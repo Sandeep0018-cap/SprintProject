@@ -1,0 +1,218 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Customers')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+
+<!-- Swiggy-like theme -->
+<style>
+  :root{
+    --swiggy-orange:#FC8019;
+    --ink:#02060C;
+    --ink-2:#3E4152;
+    --muted:#6B7280;
+    --border:#ECECEC;
+    --bg:#F6F7F9;
+    --card:#ffffff;
+    --success:#12B76A;
+    --warning:#FEC84B;
+    --danger:#F04438;
+  }
+  body{ background:var(--bg); color:var(--ink); }
+
+  .section-title{ color:var(--ink); font-weight:700; }
+  .accent{ color:var(--swiggy-orange); }
+
+  /* Card */
+  .card{
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+    overflow:hidden;
+    background:var(--card);
+  }
+
+  /* Toolbar */
+  .toolbar{
+    display:flex; gap:.75rem; flex-wrap:wrap; align-items:center;
+    background:#fff; border:1px solid var(--border);
+    padding:.75rem; border-radius:12px;
+  }
+  .toolbar .form-control, .toolbar .form-select{
+    border-radius:10px; border:1px solid var(--border);
+  }
+  .btn-orange{
+    background:var(--swiggy-orange); color:#fff; border:none;
+    border-radius:10px;
+  }
+  .btn-orange:hover{ filter:brightness(.95); }
+
+  /* Table */
+  .table thead th{
+    position:sticky; top:0; z-index:1;
+    background:#fff; border-bottom:1px solid var(--border)!important;
+    color:#374151; font-weight:600;
+  }
+  .table td, .table th{ vertical-align:middle; }
+  .table-hover tbody tr:hover{ background:rgba(252,128,25,.04); }
+  .table tbody tr:nth-child(odd){ background: #fafafa; }
+  .text-muted{ color:var(--muted)!important; }
+
+  /* Avatar (initials) */
+  .avatar{
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(135deg, rgba(252,128,25,.15), rgba(252,128,25,.06));
+    display:inline-flex; align-items:center; justify-content:center;
+    color:var(--swiggy-orange); font-weight:700;
+    border:1px solid var(--border);
+  }
+  .customer-name{
+    display:flex; align-items:center; gap:.6rem;
+  }
+  .badge-soft{
+    background:#fff; border:1px solid var(--border);
+    border-radius:999px; padding:.25rem .6rem; color:var(--ink-2); font-weight:500;
+  }
+
+  /* Utilities */
+  .shadow-sm-soft{ box-shadow:0 4px 12px rgba(0,0,0,.04); }
+</style>
+
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 section-title m-0"><i class="bi bi-people me-2 accent"></i>Customers</h1>
+    <!-- Optional: Add a "New Customer" if applicable -->
+    <!-- <a th:href="@{/customers/new}" class="btn btn-orange"><i class="bi bi-plus-lg me-1"></i>Add Customer</a> -->
+  </div>
+
+  <!-- Toolbar: search, filter, export -->
+  <div class="toolbar mb-3 shadow-sm-soft">
+    <form class="d-flex flex-wrap gap-2 w-100" method="get" th:action="@{/customers}">
+      <!-- Keyword search -->
+      <div class="input-group flex-grow-1" style="min-width:240px;">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input class="form-control border-start-0" type="search" name="q" placeholder="Search by name or phone"
+               th:value="${param.q}" aria-label="Search customers">
+      </div>
+
+      <!-- City filter (provide cities list from controller) -->
+      <select class="form-select" name="city" style="min-width:180px;" th:value="${param.city}">
+        <option value="">All Cities</option>
+        <option th:each="city : ${cities}" th:value="${city}" th:text="${city}">City</option>
+      </select>
+
+      <!-- Sort (optional) -->
+      <select class="form-select" name="sort" style="min-width:180px;" th:value="${param.sort}">
+        <option value="">Sort by</option>
+        <option value="nameAsc"  th:selected="${param.sort=='nameAsc'}">Name ↑</option>
+        <option value="nameDesc" th:selected="${param.sort=='nameDesc'}">Name ↓</option>
+        <option value="idDesc"   th:selected="${param.sort=='idDesc'}">Newest</option>
+        <option value="idAsc"    th:selected="${param.sort=='idAsc'}">Oldest</option>
+      </select>
+
+      <div class="ms-auto d-flex gap-2">
+        <button type="submit" class="btn btn-orange"><i class="bi bi-filter me-1"></i>Apply</button>
+        <!-- Export actions (wire up endpoints if available) -->
+        <a th:href="@{/customers/export/csv(q=${param.q}, city=${param.city}, sort=${param.sort})}" class="btn btn-light border">
+          <i class="bi bi-download me-1"></i>Export CSV
+        </a>
+        <!-- <a th:href="@{/customers/export/xlsx(q=${param.q}, city=${param.city}, sort=${param.sort})}" class="btn btn-light border">
+          <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+        </a> -->
+      </div>
+    </form>
+  </div>
+
+  <!-- Table Card -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width:80px;">ID</th>
+            <th>Name</th>
+            <th style="width:160px;">Phone</th>
+            <th style="width:180px;">City</th>
+            <th>Last Item</th>
+            <th style="width:180px;">Brand</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="c : ${rows}">
+            <td class="text-muted" th:text="${c.id}">1</td>
+
+            <!-- Name with initials avatar -->
+            <td>
+              <div class="customer-name">
+                <div class="avatar"
+                     th:text="${#strings.arrayJoin(#strings.split((c.name?:'').trim(), ' '), '') != '' ?
+                               (#strings.substring((c.name?:'').trim(), 0,1) + (#lists.isEmpty(#strings.split((c.name?:'').trim(), ' ')) ? '' : #strings.substring(#strings.listSplit((c.name?:'').trim(), ' ')[^0],0,0))) :
+                               'C'}">
+                  A
+                </div>
+                <div class="fw-bold" th:text="${c.name}">Name</div>
+              </div>
+            </td>
+
+            <td>
+              <span th:text="${c.phone}">Phone</span>
+            </td>
+
+            <td>
+              <span class="badge badge-soft" th:text="${c.city}">City</span>
+            </td>
+
+            <td class="text-muted"
+                th:text="${c.lastPurchasedProductName == null || #strings.isEmpty(c.lastPurchasedProductName) ? '-' : c.lastPurchasedProductName}">-</td>
+
+            <td class="text-muted"
+                th:text="${c.lastPurchasedBrand == null || #strings.isEmpty(c.lastPurchasedBrand) ? '-' : c.lastPurchasedBrand}">-</td>
+          </tr>
+
+          <tr th:if="${#lists.isEmpty(rows)}">
+            <td colspan="6" class="text-center text-muted py-4">
+              <div class="py-2">
+                <i class="bi bi-emoji-neutral text-secondary fs-5 me-1"></i>
+                No customers found
+              </div>
+              <div class="small">Try a different search or clear filters.</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination (optional) -->
+    <div class="d-flex justify-content-between align-items-center p-3" th:if="${page != null}">
+      <div class="text-muted small">
+        Page <span th:text="${page.number + 1}">1</span> of <span th:text="${page.totalPages}">1</span>
+        &middot; <span th:text="${page.totalElements}">0</span> total
+      </div>
+      <div class="btn-group">
+        <a class="btn btn-light border" th:classappend="${page.first} ? ' disabled'"
+           th:href="@{/customers(page=${page.number-1}, size=${page.size}, q=${param.q}, city=${param.city}, sort=${param.sort})}">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+        <a class="btn btn-light border" th:classappend="${page.last} ? ' disabled'"
+           th:href="@{/customers(page=${page.number+1}, size=${page.size}, q=${param.q}, city=${param.city}, sort=${param.sort})}">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- (Optional) Page-specific helpers -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // Autofocus search if empty
+  const q = document.querySelector('input[name="q"]');
+  if (q && !q.value) q.focus();
+/*]]>*/
+</script>
+
+</body>
+</html>
+``
