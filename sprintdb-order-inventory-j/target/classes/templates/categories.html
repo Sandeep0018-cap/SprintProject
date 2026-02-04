@@ -1,0 +1,117 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="light">
+<head th:replace="~{fragments :: head('Categories')}">
+    <!-- Fallback for standalone testing -->
+    <link href="https://cdn.jsdelivr.net" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net">
+</head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h1 class="h3 section-title m-0"><i class="bi bi-grid me-2"></i>Categories</h1>
+    
+   
+ 
+  </div>
+
+  <div class="row g-3">
+    <!-- Category Chips with 3D Palette -->
+    <div class="col-lg-3 col-md-4 col-6" th:each="c : ${categories}">
+      <a class="category-chip-3d" th:href="@{/categories/{id}(id=${c.id})}" th:text="${c.name}">Category</a>
+    </div>
+    
+    <!-- Empty State -->
+    <div class="col-12" th:if="${#lists.isEmpty(categories)}">
+      <div class="alert alert-info border-0 shadow-sm">No categories available.</div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* 3D Toolbar Button Styling */
+  .theme-btn-3d {
+    background: linear-gradient(145deg, var(--bs-tertiary-bg), var(--bs-body-bg));
+    border: 1px solid var(--bs-border-color);
+    border-bottom: 3px solid var(--bs-border-color-darker, #d0d7de);
+    color: var(--bs-body-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.1s ease;
+    border-radius: 6px;
+  }
+
+  .theme-btn-3d:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+    box-shadow: none;
+  }
+
+  /* 3D Category Chips - GitHub Color Palette */
+  .category-chip-3d {
+    display: block;
+    padding: 12px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 8px;
+    color: #0969da; /* GitHub Blue */
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-bottom: 4px solid var(--bs-border-color);
+    transition: all 0.2s ease;
+  }
+
+  /* Dark Mode Palette Adjustments */
+  [data-bs-theme="dark"] .category-chip-3d {
+    color: #4493f8;
+    background: #161b22;
+    border-bottom-color: #30363d;
+  }
+
+  .category-chip-3d:hover {
+    transform: translateY(-2px);
+    background-color: var(--bs-tertiary-bg);
+    border-color: #0969da;
+    border-bottom-color: #0969da;
+    color: #0969da !important;
+  }
+
+  [data-bs-theme="dark"] .category-chip-3d:hover {
+    border-color: #4493f8;
+    border-bottom-color: #4493f8;
+    color: #4493f8 !important;
+  }
+
+  .category-chip-3d:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+    margin-bottom: 3px;
+  }
+</style>
+
+<script>
+  const toggler = document.getElementById('themeToggler');
+  const icon = document.getElementById('themeIcon');
+  const html = document.documentElement;
+
+  // Persistence logic using Browser LocalStorage
+  const savedTheme = localStorage.getItem('theme') || 
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+  applyTheme(savedTheme);
+
+  toggler.addEventListener('click', () => {
+    const newTheme = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+  });
+
+  function applyTheme(theme) {
+    html.setAttribute('data-bs-theme', theme);
+    localStorage.setItem('theme', theme);
+    icon.className = theme === 'dark' ? 'bi bi-moon-stars-fill me-2' : 'bi bi-sun-fill me-2';
+  }
+</script>
+
+</body>
+</html>

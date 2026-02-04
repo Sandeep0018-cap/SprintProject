@@ -1,0 +1,59 @@
+<!-- fragments/topbar.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- ========================================
+     GLOBAL TOP NAVIGATION BAR (Bootstrap 5)
+     ======================================== -->
+
+<nav class="navbar navbar-dark bg-dark shadow-sm fixed-top" id="topNavBar">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+
+        <!-- Sidebar Toggle Button -->
+        <button class="btn btn-outline-light me-3" id="sidebarToggleBtn">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+
+        <!-- Logo / App Name -->
+        @{/dashboard}
+            <span class="navbar-brand mb-0 h1 fw-bold">SprintDB OIS</span>
+        </a>
+
+        <!-- Right Side Controls -->
+        <div class="d-flex align-items-center gap-3">
+
+            <!-- Logged in username (if needed later)
+            <div sec:authorize="isAuthenticated()" class="text-white small">
+                <i class="bi bi-person-circle me-1"></i>
+                <span th:text="${#authentication.name}"></span>
+            </div>
+            -->
+
+            <!-- Logout Button -->
+            @{/logout}
+                <button class="btn btn-sm btn-outline-light" type="submit">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
+
+        </div>
+    </div>
+</nav>
+
+<!-- Sidebar Toggle Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar') || document.getElementById('appSidebar');
+        const content = document.getElementById('content') || document.getElementById('contentArea');
+        const toggleBtn = document.getElementById('sidebarToggle') || document.getElementById('sidebarToggleBtn');
+
+        if (sidebar && toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                if (content) content.classList.toggle('expanded');
+            });
+        }
+    });
+</script>
+
+</html>
