@@ -1,0 +1,98 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Restock Request')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+
+<div class="container py-4" style="max-width:800px;">
+  <h1 class="h3 section-title mb-4"><i class="bi bi-truck me-2"></i>Restock Request</h1>
+
+  <div class="card border-0 bg-transparent">
+    <!-- Added 'needs-validation' class -->
+    <div class="card-body p-4 border rounded-3 bg-body shadow-sm" style="border-bottom: 4px solid var(--bs-border-color) !important;">
+      <form th:action="@{/staff/restock}" method="post" th:object="${req}" class="row g-3 needs-validation" novalidate>
+        
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Vendor</label>
+          <select class="form-select form-select-3d" th:field="*{vendorId}" required>
+            <option value="" disabled selected>Select vendor</option>
+            <option th:each="v : ${vendors}" th:value="${v.id}" th:text="${v.name}"></option>
+          </select>
+          <div class="invalid-feedback small fw-bold">Please select a vendor.</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Product (Low on stock)</label>
+          <select class="form-select form-select-3d" th:field="*{productId}" required>
+            <option value="" disabled selected>Select product</option>
+            <option th:each="p : ${products}" th:value="${p.id}"
+                    th:text="${p.brand + ' ' + p.name + ' [' + p.skuId + ']'}"></option>
+          </select>
+          <div class="invalid-feedback small fw-bold">Please select a product.</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Requested Quantity</label>
+          <input class="form-control form-control-3d" type="number" min="1" th:field="*{requestedQty}" placeholder="10" required/>
+          <div class="invalid-feedback small fw-bold">Quantity must be at least 1.</div>
+        </div>
+
+        <div class="col-12 d-flex gap-2 pt-3">
+          <button class="btn btn-primary btn-3d px-4" type="submit">
+            <i class="bi bi-send-check me-1"></i>Submit Request
+          </button>
+          <a class="btn btn-light btn-3d px-4" th:href="@{/dashboard}">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="alert alert-info mt-4 border-0 shadow-sm" style="border-left: 4px solid #0969da !important; border-radius: 8px;">
+    <i class="bi bi-info-circle-fill me-2"></i>Requests are saved as <b>PENDING</b> until approved.
+  </div>
+</div>
+
+<!-- Validation Script -->
+<script>
+  (() => {
+    'use strict'
+    const forms = document.querySelectorAll('.needs-validation')
+
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+  })()
+</script>
+
+<!-- Custom Styles for 3D Validation -->
+<style>
+  /* When validated, make the 3D border change color */
+  .was-validated .form-control:invalid, 
+  .was-validated .form-select:invalid {
+    border-color: #cf222e !important; /* GitHub Red */
+    border-bottom: 4px solid #cf222e !important;
+    background-image: none; /* Removes default Bootstrap icon for cleaner 3D look */
+  }
+
+  .was-validated .form-control:valid, 
+  .was-validated .form-select:valid {
+    border-color: #1f883d !important; /* GitHub Green */
+    border-bottom: 4px solid #1f883d !important;
+  }
+
+  .invalid-feedback {
+    color: #cf222e;
+    margin-top: 0.5rem;
+  }
+</style>
+
+</body>
+</html>
