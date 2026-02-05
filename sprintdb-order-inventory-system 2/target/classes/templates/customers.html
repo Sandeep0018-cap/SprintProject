@@ -1,0 +1,103 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Customers')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+
+<!-- Remove if you do NOT have a layout.html -->
+<!-- <div th:replace="~{layout}"></div> -->
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 m-0 text-white">Customers</h1>
+  </div>
+
+  <!-- Add Customer Form -->
+  <div class="card shadow-sm mb-3 bg-dark border-0">
+    <div class="card-header bg-dark text-white border-secondary">
+      Add Customer
+    </div>
+    <div class="card-body">
+      @{/admin/customers}
+
+        <div class="col-md-4">
+          <input class="form-control" th:field="*{name}" placeholder="Customer Name" required/>
+        </div>
+
+        <div class="col-md-3">
+          <input class="form-control" th:field="*{phone}" placeholder="Phone" required/>
+        </div>
+
+        <div class="col-md-3">
+          <input class="form-control" th:field="*{city}" placeholder="City" required/>
+        </div>
+
+        <div class="col-md-2 d-grid">
+          <button class="btn btn-primary" type="submit">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card shadow-sm bg-dark border-0">
+    <div class="table-responsive">
+      <table class="table mb-0 align-middle table-dark table-hover">
+        <thead class="border-secondary">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>City</th>
+            <th>Purchased Item</th>
+            <th>Payment Mode</th>
+            <th>Transaction ID</th>
+            <th>Last Purchase ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="r : ${rows}">
+            <td th:text="${r.id}">1</td>
+            <td th:text="${r.name}">Name</td>
+            <td th:text="${r.phone}">Phone</td>
+            <td th:text="${r.city}">City</td>
+            <td th:text="${r.purchasedItem}">-</td>
+            <td th:text="${r.paymentMode == null ? '-' : r.paymentMode}">-</td>
+            <td th:text="${r.transactionId == null ? '-' : r.transactionId}">-</td>
+            <td th:text="${r.lastPurchaseId == null ? '-' : r.lastPurchaseId}">-</td>
+          </tr>
+
+          <tr th:if="${#lists.isEmpty(rows)}">
+            <td colspan="8" class="text-center text-secondary py-3">No customers</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Dark theme polish */
+  .card.bg-dark { background-color: #151515 !important; }
+  .card-header { font-weight: 600; }
+  .form-control {
+    background-color: #1a1c21 !important;
+    border: 1px solid #2c2f36 !important;
+    color: #e8eaed !important;
+  }
+  .form-control::placeholder { color: #7f8287; }
+  .form-control:focus {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25) !important;
+  }
+  table.table-dark thead th {
+    color: #cfd1d4 !important;
+    background-color: #1a1c21 !important;
+  }
+  table.table-dark tbody tr:hover {
+    background-color: #202226 !important;
+  }
+</style>
+
+</body>
+</html>
