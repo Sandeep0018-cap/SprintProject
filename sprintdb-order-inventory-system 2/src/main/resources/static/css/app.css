@@ -1,0 +1,90 @@
+/* Global background */
+body {
+  padding-bottom: 24px;
+  background: #0b0c0e;        /* deep dark bg */
+  color: #e8eaed;             /* soft white text */
+}
+
+/* Cards */
+.card {
+  border-radius: 16px;
+  background: #141519;        /* elevated dark surface */
+  border: 1px solid #2a2d34;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+/* Buttons, form controls */
+.btn,
+.form-control,
+.form-select {
+  border-radius: 12px;
+  background-color: #1a1c21;
+  border: 1px solid #2c2f36;
+  color: #e8eaed;
+}
+
+.form-control:focus,
+.form-select:focus,
+.btn:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
+  background-color: #1f2126;
+}
+
+/* Light → dark primary button */
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+}
+
+/* Outline buttons (navbar logout, etc.) */
+.btn-outline-light {
+  color: #e8eaed;
+  border-color: #3a3f47;
+}
+.btn-outline-light:hover {
+  background-color: #1f1f24;
+  border-color: #4c4f57;
+  color: #fff;
+}
+
+/* Tables */
+.table {
+  color: #d9dce2;
+  background: #141519;
+}
+.table thead th {
+  white-space: nowrap;
+  color: #b6b8bd;
+  border-bottom: 1px solid #2a2d34;
+}
+.table tbody tr {
+  border-color: #22252a;
+}
+.table tbody tr:hover {
+  background: #1a1c21;
+}
+
+/* Badges */
+.badge {
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+/* Replace light-red “out” class with dark-themed variant */
+.out {
+  background: rgba(255, 80, 80, 0.1);   /* soft red tint for dark mode */
+  color: #ff8080;
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+/* Inputs text */
+.form-control::placeholder {
+  color: #7f8287;
+}
