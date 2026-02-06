@@ -1,0 +1,340 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Dashboard')}"></head>
+<body>
+
+<div th:replace="~{fragments :: nav}"></div>
+
+<div class="container py-4">
+
+  <!-- Welcome overlay (once after login) -->
+  <div th:if="${showWelcome}" class="welcome-banner mb-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="display-6" style="color:#FC8019;">
+        <i class="bi bi-emoji-smile"></i>
+      </div>
+      <div class="flex-grow-1">
+        <div class="h4 fw-bold mb-0" th:text="${welcomeRole}">Welcome Admin</div>
+        <div class="text-muted">Have a great day ahead!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header + Bell -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <h1 class="h3 section-title m-0">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </h1>
+      <span class="badge text-bg-light border" th:text="${loginRole}">Admin Login</span>
+    </div>
+
+    <!-- 🔔 Bell split-button: bell = refresh/go dashboard, caret = dropdown -->
+    <div class="btn-group">
+      <!-- Bell button -->
+      <button type="button" class="btn btn-light position-relative" onclick="handleBellClick(event)" aria-label="Notifications">
+        <i class="bi bi-bell text-danger"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              th:text="${lowStockCount}">0</span>
+      </button>
+      <!-- Dropdown toggle -->
+      <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Toggle notifications dropdown">
+        <span class="visually-hidden">Toggle notifications dropdown</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end p-2"
+          aria-labelledby="notifBell"
+          style="min-width:360px; max-height:360px; overflow:auto;">
+        <li th:each="a : ${lowStockAlerts}">
+          <div class="d-flex align-items-center gap-2 px-2 py-2 rounded"
+               th:classappend="${a.severity == 'RED'} ? ' bg-light border-start border-4 border-danger' :
+                               (${a.severity == 'ORANGE'} ? ' bg-light border-start border-4 border-warning' : ' bg-light border-start border-4 border-success')">
+            <div class="flex-grow-1">
+              <div class="fw-semibold" th:text="${a.brand + ' ' + a.name}">Item</div>
+              <div class="small text-muted">
+                Available:
+                <span class="badge"
+                      th:classappend="${a.availableQty <= 4} ? ' bg-danger' :
+                                      (${a.availableQty <= 10} ? ' bg-warning' : ' bg-success')"
+                      th:text="${a.availableQty}">0</span>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li th:if="${#lists.isEmpty(lowStockAlerts)}" class="px-2 py-1 text-muted">No low-stock alerts.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Full-width alerts + Close all -->
+  <div class="mb-3" id="lowStockArea">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="fw-semibold">Low-stock alerts</div>
+      <button class="btn btn-sm btn-outline-secondary" type="button" onclick="closeAllAlerts()">Close all</button>
+    </div>
+
+    <div th:each="a : ${lowStockAlerts}"
+         class="alert d-flex justify-content-between align-items-center"
+         th:classappend="${a.severity == 'RED'} ? ' alert-danger' :
+                         (${a.severity == 'ORANGE'} ? ' alert-warning' : ' alert-success')">
+      <div>
+        <strong th:text="${a.brand + ' ' + a.name}">Item</strong>
+        <span class="ms-2">is low on stock:</span>
+        <span class="badge"
+              th:classappend="${a.availableQty <= 4} ? ' bg-danger' :
+                              (${a.availableQty <= 10} ? ' bg-warning' : ' bg-success')"
+              th:text="${a.availableQty}">0</span>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.alert').remove()"></button>
+    </div>
+
+    <div th:if="${#lists.isEmpty(lowStockAlerts)}" class="alert alert-info mb-0">No low-stock alerts right now.</div>
+  </div>
+
+  <!-- Quick tiles -->
+  <div class="row g-3 mb-4">
+    <!-- Orders tile -->
+    <div class="col-md-3 col-sm-6">
+      <button type="button"
+              class="stat-tile d-flex align-items-center gap-3 p-3 border rounded shadow-sm w-100 text-start hover-tile"
+              onclick="window.location.href='/orders'" aria-label="Go to Orders">
+        <div class="display-6 text-primary">
+          <i class="bi bi-box-arrow-in-right"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold text-dark">Orders</div>
+          <div class="text-muted small">Track by status</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Payments tile -->
+    <div class="col-md-3 col-sm-6">
+      <button type="button"
+              class="stat-tile d-flex align-items-center gap-3 p-3 border rounded shadow-sm w-100 text-start hover-tile"
+              onclick="window.location.href='/payments'" aria-label="Go to Payments">
+        <div class="display-6 text-success">
+          <i class="bi bi-credit-card"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold text-dark">Payments</div>
+          <div class="text-muted small">Modes & totals</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Restock tile (STAFF) -->
+    <div class="col-md-3 col-sm-6" sec:authorize="hasRole('STAFF')">
+      <button type="button"
+              class="stat-tile d-flex align-items-center gap-3 p-3 border rounded shadow-sm w-100 text-start hover-tile"
+              onclick="window.location.href='/staff/restock/new'" aria-label="Create Restock">
+        <div class="display-6 text-success">
+          <i class="bi bi-truck"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold text-dark">Restock Requests</div>
+          <div class="text-muted small">Create vendor restock</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Categories tile -->
+    <div class="col-md-3 col-sm-6">
+      <button type="button"
+              class="stat-tile d-flex align-items-center gap-3 p-3 border rounded shadow-sm w-100 text-start hover-tile"
+              onclick="window.location.href='/categories'" aria-label="Go to Categories">
+        <div class="display-6 text-warning">
+          <i class="bi bi-grid"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold text-dark">Categories</div>
+          <div class="text-muted small">Browse inventory</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Admin charts -->
+  <div sec:authorize="hasRole('ADMIN')" class="mb-4">
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">Order Status</div>
+          <div class="card-body">
+            <canvas id="orderStatusPie" class="chart-280 w-100"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">Monthly Sales Overview</div>
+          <div class="card-body">
+            <canvas id="salesLine" class="chart-280 w-100"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">Brand-wise Performance</div>
+          <div class="card-body">
+            <canvas id="brandBar" class="chart-280 w-100"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">Stock Status</div>
+          <div class="card-body">
+            <canvas id="stockDonut" class="chart-280 w-100"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+
+  <!-- Staff dashboard: Requested items + flash -->
+  <div sec:authorize="hasRole('STAFF')">
+    <div th:if="${msg}" class="alert alert-success" th:text="${msg}"></div>
+    <h2 class="h5 fw-bold mb-2">Requested Items</h2>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Vendor</th>
+            <th>Qty</th>
+            <th>Status</th>
+            <th>Requested By</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="r : ${myRestocks}">
+            <td th:text="${r.id}">1</td>
+            <td th:text="${r.product.brand + ' ' + r.product.name}">Product</td>
+            <td th:text="${r.vendor.name}">Vendor</td>
+            <td th:text="${r.requestedQty}">10</td>
+            <td>
+              <span class="badge"
+                    th:classappend="${r.status.name()=='PENDING' ? ' bg-warning' :
+                                    (r.status.name()=='ORDERED' ? ' bg-primary' :
+                                     (r.status.name()=='RECEIVED' ? ' bg-success' : ' bg-danger'))}"
+                    th:text="${r.status}">PENDING</span>
+            </td>
+            <td th:text="${r.createdByUsername}">user</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(myRestocks)}">
+            <td colspan="6" class="text-center text-muted py-3">No restock requests yet</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div> <!-- /.container -->
+
+<!-- Local styles for tiles and charts -->
+<style>
+  .hover-tile { transition: transform .08s ease, box-shadow .08s ease; cursor: pointer; }
+  .hover-tile:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
+  .chart-280 { height: 280px; }
+</style>
+
+<!-- Bootstrap JS (needed for dropdown) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Chart.js (must load before the inline chart script) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<!-- Page scripts -->
+<script>
+  // Bell click: refresh if already on /dashboard, else navigate there
+  function handleBellClick(e) {
+    e.preventDefault();
+    const target = '/dashboard';
+    const here = window.location.pathname.replace(/\/+$/, '');
+    const there = target.replace(/\/+$/, '');
+    if (here === there) {
+      window.location.reload();
+    } else {
+      window.location.href = target;
+    }
+  }
+
+  function closeAllAlerts(){
+    document.querySelectorAll('#lowStockArea .alert').forEach(el => el.remove());
+  }
+</script>
+
+<!-- Chart init (Thymeleaf inline) -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+  const addShadow = (ctx) => {
+    const stroke = ctx.stroke.bind(ctx), fill = ctx.fill.bind(ctx);
+    ctx.stroke = (...args) => { ctx.save(); ctx.shadowColor='rgba(0,0,0,.15)'; ctx.shadowBlur=8; ctx.shadowOffsetY=4; stroke(...args); ctx.restore(); };
+    ctx.fill   = (...args) => { ctx.save(); ctx.shadowColor='rgba(0,0,0,.10)'; ctx.shadowBlur=10; ctx.shadowOffsetY=6; fill(...args); ctx.restore(); };
+  };
+
+  const monthsLabels = /*[[${monthsLabels}]]*/ [];
+  const monthsValues = /*[[${monthsValues}]]*/ [];
+  const brandLabels  = /*[[${brandLabels}]]*/ [];
+  const brandValues  = /*[[${brandValues}]]*/ [];
+  const donutLabels  = /*[[${donutLabels}]]*/ [];
+  const donutValues  = /*[[${donutValues}]]*/ [];
+  const orderStatusLabels = /*[[${orderStatusLabels}]]*/ [];
+  const orderStatusValues = /*[[${orderStatusValues}]]*/ [];
+
+  const pie = document.getElementById('orderStatusPie');
+  if (pie) {
+    const ctx = pie.getContext('2d'); addShadow(ctx);
+    new Chart(pie, {
+      type: 'doughnut',
+      data: { labels: orderStatusLabels,
+              datasets: [{ data: orderStatusValues, backgroundColor: ['#F04438','#FEC84B','#12B76A','#6C4CF7'] }] },
+      options: { maintainAspectRatio:false, cutout:'55%', plugins:{ legend:{ position:'bottom' } } }
+    });
+  }
+
+  const line = document.getElementById('salesLine');
+  if (line) {
+    const ctx = line.getContext('2d'); addShadow(ctx);
+    const grad = ctx.createLinearGradient(0, 0, 0, 280);
+    grad.addColorStop(0, 'rgba(108,76,247,.35)'); grad.addColorStop(1, 'rgba(108,76,247,.06)');
+    new Chart(line, {
+      type: 'line',
+      data: { labels: monthsLabels, datasets: [{ label:'Revenue', data: monthsValues, borderColor:'#6C4CF7', backgroundColor:grad, tension:.35, fill:true, pointRadius:3, pointBackgroundColor:'#6C4CF7' }]},
+      options:{ maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'₹'+v.toLocaleString() } } }, plugins:{ legend:{ display:false } } }
+    });
+  }
+
+  const bar = document.getElementById('brandBar');
+  if (bar) {
+    const ctx = bar.getContext('2d'); addShadow(ctx);
+    new Chart(bar, {
+      type:'bar',
+      data:{ labels: brandLabels, datasets:[{ label:'Revenue', data: brandValues, backgroundColor:'#12B76A' }]},
+      options:{ maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'₹'+v.toLocaleString() } } }, plugins:{ legend:{ display:false } } }
+    });
+  }
+
+  const donut = document.getElementById('stockDonut');
+  if (donut) {
+    const ctx = donut.getContext('2d'); addShadow(ctx);
+    new Chart(donut, {
+      type:'doughnut',
+      data:{ labels: donutLabels, datasets:[{ data: donutValues, backgroundColor: ['#F04438','#FEC84B','#12B76A'] }]},
+      options:{ maintainAspectRatio:false, cutout:'55%', plugins:{ legend:{ position:'bottom' } } }
+    });
+  }
+/*]]>*/
+</script>
+
+</body>
+</html>
