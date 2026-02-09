@@ -1,0 +1,142 @@
+/* ===========================
+   MakeMyTrip × Blinkit Theme
+   Clean, bright, airy, subtle depth
+   =========================== */
+
+:root{
+  --primary: #0B5FFF;      /* Travel Blue */
+  --primary-600: #0A53EB;
+  --accent:  #12B76A;      /* Fresh Green */
+  --warning: #FEC84B;
+  --danger:  #F04438;
+  --muted:   #667085;
+  --text:    #1F2937;
+  --bg:      #F7F8FA;
+  --card:    #FFFFFF;
+  --border:  #E6E7EB;
+
+  --radius:  12px;
+  --shadow-sm: 0 6px 14px rgba(17, 24, 39, 0.06);
+  --shadow-md: 0 10px 24px rgba(17, 24, 39, 0.08);
+  --shadow-lg: 0 18px 40px rgba(17, 24, 39, 0.10);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+
+/* Navbar */
+.navbar {
+  background: var(--card) !important;
+  border-bottom: 1px solid var(--border);
+}
+.navbar-brand {
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: var(--primary) !important;
+}
+.nav-link {
+  color: #475467 !important;
+  font-weight: 600;
+}
+.nav-link:hover { color: var(--primary) !important; }
+
+/* Buttons */
+.btn { border-radius: var(--radius); font-weight: 700; }
+.btn-primary {
+  background: linear-gradient(180deg, var(--primary), var(--primary-600)) !important;
+  border: 0 !important;
+  box-shadow: 0 8px 18px rgba(11, 95, 255, .25);
+}
+.btn-primary:hover { filter: brightness(1.02); transform: translateY(-1px); }
+.btn-outline-secondary, .btn-outline-danger { border-radius: var(--radius); }
+
+/* Cards */
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  color: #344054;
+}
+
+/* Category chips (if used elsewhere) */
+.category-chip {
+  display: block;
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-weight: 700;
+  color: #344054;
+  transition: all .18s ease;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+.category-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Tables */
+.table { background: #fff; }
+.table thead { background: #F9FAFB; font-size: 14px; }
+.table-hover tbody tr:hover { background: #F5F8FF; }
+
+/* Forms */
+.form-control, .form-select {
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 .2rem rgba(11, 95, 255, .12);
+}
+
+/* Dashboard Tiles */
+.stat-tile {
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.stat-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.stat-tile .label { color: var(--muted); font-size: 13px; font-weight: 800; text-transform: uppercase; }
+.stat-tile .value { font-size: 34px; font-weight: 900; color: #101828; }
+.stat-tile.mode-online  .value { color: var(--primary); }
+.stat-tile.mode-upi     .value { color: var(--accent); }
+.stat-tile.mode-card    .value { color: #155EEF; }
+.stat-tile.mode-wallet  .value { color: #7A5AF8; }
+.stat-tile.mode-netbanking .value { color: #12A4D9; }
+.stat-tile.mode-cod     .value { color: var(--danger); }
+
+/* Badges */
+.badge { border-radius: 10px; padding: .5em .7em; font-weight: 700; }
+.badge.bg-success { background: #12B76A !important; }
+.badge.bg-danger  { background: #F04438 !important; }
+
+/* Utility */
+.section-title { font-weight: 800; letter-spacing: .2px; color: #101828; }
+.text-muted-ink { color: var(--muted) }
+tr.out { background: #FFF3F3 !important; }
+
+/* Readability tweak for warning badges (stock 5–10) */
+.badge.bg-warning { background: #FEC84B !important; color: #1F2937 !important; }

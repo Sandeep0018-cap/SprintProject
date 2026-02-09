@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+ 
+  <!-- Your main CSS -->
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+ 
+<body class="dash-body">
+  <!-- Top glow background -->
+  <div class="dash-bg"></div>
+ 
+  <!-- Sidebar -->
+  <aside class="dash-side">
+    <div class="brand">
+      <div class="brand-logo">SB</div>
+      <div class="brand-text">
+        <div class="brand-title">SprintDB</div>
+        <div class="brand-sub">Order Inventory System</div>
+      </div>
+    </div>
+ 
+    <nav class="side-nav">
+      <a class="nav-item active" th:href="@{/dashboard}">
+        <span class="nav-dot"></span> Dashboard
+      </a>
+      <a class="nav-item" th:href="@{/admin/categories}">
+        <span class="nav-dot"></span> Categories
+      </a>
+      <a class="nav-item" th:href="@{/customers}">
+        <span class="nav-dot"></span> Customers
+      </a>
+      <a class="nav-item" th:href="@{/orders}">
+        <span class="nav-dot"></span> Orders
+      </a>
+      <a class="nav-item" th:href="@{/payments}">
+        <span class="nav-dot"></span> Payments
+      </a>
+    </nav>
+ 
+    <div class="side-footer">
+      <div class="role-pill">
+        <span class="pulse"></span>
+        <span>Admin Logged In</span>
+      </div>
+      <a class="logout-btn" th:href="@{/logout}">Logout</a>
+    </div>
+  </aside>
+ 
+  <!-- Main -->
+  <main class="dash-main">
+ 
+    <!-- Header -->
+    <header class="dash-top">
+      <div>
+        <div class="hello">Admin</div>
+        <h1 class="title">Dashboard</h1>
+        <p class="subtitle">Track orders, stock alerts, categories, brands & customers.</p>
+      </div>
+ 
+      <div class="top-actions">
+        <div class="search">
+          <span class="search-ic">⌕</span>
+          <input type="text" placeholder="Search SKU / Brand / Customer…" />
+        </div>
+        <a class="primary-btn" th:href="@{/admin/categories}">+ Add / Manage Inventory</a>
+      </div>
+    </header>
+ 
+    <!-- Stat cards -->
+    <section class="stats">
+      <a class="stat-card" th:href="@{/products}">
+        <div class="stat-ic">📦</div>
+        <div class="stat-meta">
+          <div class="stat-label">Products</div>
+          <div class="stat-value" th:text="${totalProducts != null ? totalProducts : 150}">150</div>
+          <div class="stat-sub">Total items tracked</div>
+        </div>
+        <div class="stat-glow"></div>
+      </a>
+ 
+      <a class="stat-card" th:href="@{/admin/categories}">
+        <div class="stat-ic">🧩</div>
+        <div class="stat-meta">
+          <div class="stat-label">Categories</div>
+          <div class="stat-value" th:text="${totalCategories != null ? totalCategories : 15}">15</div>
+          <div class="stat-sub">Browse inventory</div>
+        </div>
+        <div class="stat-glow"></div>
+      </a>
+ 
+      <a class="stat-card" th:href="@{/orders}">
+        <div class="stat-ic">🧾</div>
+        <div class="stat-meta">
+          <div class="stat-label">Orders</div>
+          <div class="stat-value" th:text="${totalOrders != null ? totalOrders : 86}">86</div>
+          <div class="stat-sub">Track by status</div>
+        </div>
+        <div class="stat-glow"></div>
+      </a>
+ 
+      <a class="stat-card" th:href="@{/customers}">
+        <div class="stat-ic">👤</div>
+        <div class="stat-meta">
+          <div class="stat-label">Customers</div>
+          <div class="stat-value" th:text="${totalCustomers != null ? totalCustomers : 42}">42</div>
+          <div class="stat-sub">Recent buyers</div>
+        </div>
+        <div class="stat-glow"></div>
+      </a>
+    </section>
+ 
+    <!-- Grid -->
+    <section class="grid">
+ 
+      <!-- Order Status (CSS donut) -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Order Status</div>
+            <div class="card-sub">Quick view of fulfillment pipeline</div>
+          </div>
+          <div class="chip">Live</div>
+        </div>
+ 
+        <div class="donut-wrap">
+          <!-- Change these numbers from backend if you want -->
+          <div class="donut"
+               style="--p1: 28; --p2: 24; --p3: 30; --p4: 18;"
+               aria-label="Order Status Donut"></div>
+ 
+          <div class="legend">
+            <div class="leg"><span class="sw red"></span><span>Pending</span><b th:text="${pendingOrders != null ? pendingOrders : 28}">28</b></div>
+            <div class="leg"><span class="sw amber"></span><span>In Transit</span><b th:text="${inTransitOrders != null ? inTransitOrders : 24}">24</b></div>
+            <div class="leg"><span class="sw teal"></span><span>Delivered</span><b th:text="${deliveredOrders != null ? deliveredOrders : 30}">30</b></div>
+            <div class="leg"><span class="sw blue"></span><span>Cancelled</span><b th:text="${cancelledOrders != null ? cancelledOrders : 18}">18</b></div>
+          </div>
+        </div>
+ 
+        <div class="card-foot">
+          <a class="ghost-btn" th:href="@{/orders}">Open Orders</a>
+          <a class="ghost-btn" th:href="@{/payments}">Payments</a>
+        </div>
+      </div>
+ 
+      <!-- Monthly Sales Overview (SVG line, no JS) -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Monthly Sales Overview</div>
+            <div class="card-sub">Static preview (no JS charts)</div>
+          </div>
+          <div class="chip soft">₹</div>
+        </div>
+ 
+        <div class="chart-box">
+          <svg class="spark" viewBox="0 0 600 220" preserveAspectRatio="none" aria-label="Sales line">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="currentColor" stop-opacity="0.15"/>
+                <stop offset="1" stop-color="currentColor" stop-opacity="0.55"/>
+              </linearGradient>
+            </defs>
+ 
+            <!-- grid -->
+            <g class="gridlines">
+              <line x1="0" y1="40" x2="600" y2="40"></line>
+              <line x1="0" y1="90" x2="600" y2="90"></line>
+              <line x1="0" y1="140" x2="600" y2="140"></line>
+              <line x1="0" y1="190" x2="600" y2="190"></line>
+            </g>
+ 
+            <!-- area -->
+            <path class="area"
+              d="M0,190
+                 C60,190 60,190 120,190
+                 C180,190 180,190 240,190
+                 C300,190 300,190 360,190
+                 C420,190 420,190 480,70
+                 C520,40 560,40 600,190
+                 L600,220 L0,220 Z"></path>
+ 
+            <!-- line -->
+            <path class="line"
+              d="M0,190
+                 C60,190 60,190 120,190
+                 C180,190 180,190 240,190
+                 C300,190 300,190 360,190
+                 C420,190 420,190 480,70
+                 C520,40 560,40 600,190"></path>
+ 
+            <!-- points -->
+            <g class="pts">
+              <circle cx="0" cy="190" r="5"></circle>
+              <circle cx="120" cy="190" r="5"></circle>
+              <circle cx="240" cy="190" r="5"></circle>
+              <circle cx="360" cy="190" r="5"></circle>
+              <circle cx="480" cy="70" r="5"></circle>
+              <circle cx="600" cy="190" r="5"></circle>
+            </g>
+          </svg>
+ 
+          <div class="xlabels">
+            <span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span><span>Jan</span>
+          </div>
+        </div>
+ 
+        <div class="mini-stats">
+          <div class="mini">
+            <div class="mini-k">This Month</div>
+            <div class="mini-v" th:text="${thisMonthSales != null ? thisMonthSales : '₹58,200'}">₹58,200</div>
+          </div>
+          <div class="mini">
+            <div class="mini-k">Best Month</div>
+            <div class="mini-v" th:text="${bestMonth != null ? bestMonth : 'Dec'}">Dec</div>
+          </div>
+          <div class="mini">
+            <div class="mini-k">Growth</div>
+            <div class="mini-v pos" th:text="${growth != null ? growth : '+18%'}">+18%</div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Brand-wise Performance (CSS bars) -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Brand-wise Performance</div>
+            <div class="card-sub">Top revenue brands</div>
+          </div>
+          <div class="chip soft">Top 6</div>
+        </div>
+ 
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-name">Samsung</div>
+            <div class="bar-track"><div class="bar-fill" style="--w: 92%"></div></div>
+            <div class="bar-val" th:text="${brand1 != null ? brand1 : '₹16,400'}">₹16,400</div>
+          </div>
+ 
+          <div class="bar-row">
+            <div class="bar-name">Anker</div>
+            <div class="bar-track"><div class="bar-fill" style="--w: 76%"></div></div>
+            <div class="bar-val" th:text="${brand2 != null ? brand2 : '₹13,200'}">₹13,200</div>
+          </div>
+ 
+          <div class="bar-row">
+            <div class="bar-name">Seagate</div>
+            <div class="bar-track"><div class="bar-fill" style="--w: 61%"></div></div>
+            <div class="bar-val" th:text="${brand3 != null ? brand3 : '₹10,600'}">₹10,600</div>
+          </div>
+ 
+          <div class="bar-row">
+            <div class="bar-name">Lenovo</div>
+            <div class="bar-track"><div class="bar-fill" style="--w: 54%"></div></div>
+            <div class="bar-val" th:text="${brand4 != null ? brand4 : '₹9,400'}">₹9,400</div>
+          </div>
+ 
+          <div class="bar-row">
+            <div class="bar-name">Kingston</div>
+            <div class="bar-track"><div class="bar-fill" style="--w: 38%"></div></div>
+            <div class="bar-val" th:text="${brand5 != null ? brand5 : '₹6,700'}">₹6,700</div>
+          </div>
+ 
+          <div class="bar-row">
+            <div class="bar-name">Brother</div>
+            <div class="bar-track"><div class="bar-fill" style="--w: 36%"></div></div>
+            <div class="bar-val" th:text="${brand6 != null ? brand6 : '₹6,200'}">₹6,200</div>
+          </div>
+        </div>
+ 
+        <div class="card-foot">
+          <a class="ghost-btn" th:href="@{/admin/categories}">Browse Categories</a>
+          <a class="ghost-btn" th:href="@{/products}">View Products</a>
+        </div>
+      </div>
+ 
+      <!-- Stock Alerts -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Low Stock Alerts</div>
+            <div class="card-sub">Focus items that need restock</div>
+          </div>
+          <div class="chip danger">Attention</div>
+        </div>
+ 
+ <!-- LOW STOCK STATUS (NO JS) -->
+<div class="chart-body lowstock-wrap">
+  <svg class="ls-donut" viewBox="0 0 220 220" aria-label="Stock Status Donut (No JS)">
+    <!-- Track -->
+    <circle class="ls-track" cx="110" cy="110" r="78"></circle>
+ 
+    <!-- Segments (values must add to 100) -->
+    <!-- Low: 0–4 -->
+    <circle class="ls-seg ls-red"   cx="110" cy="110" r="78" style="--val:45; --off:0;"></circle>
+    <!-- Med: 5–10 -->
+    <circle class="ls-seg ls-amber" cx="110" cy="110" r="78" style="--val:30; --off:45;"></circle>
+    <!-- OK: >=10 -->
+    <circle class="ls-seg ls-green" cx="110" cy="110" r="78" style="--val:25; --off:75;"></circle>
+ 
+    <!-- Hole -->
+    <circle class="ls-hole" cx="110" cy="110" r="52"></circle>
+ 
+    <!-- Center text (optional) -->
+    <text x="110" y="110" text-anchor="middle" class="ls-centerBig">Stock</text>
+    <text x="110" y="134" text-anchor="middle" class="ls-centerSmall">Status</text>
+  </svg>
+ 
+  <div class="ls-legend">
+    <div class="ls-leg"><span class="ls-sw red"></span><span>0–4 (Low)</span></div>
+    <div class="ls-leg"><span class="ls-sw amber"></span><span>5–10 (Med)</span></div>
+    <div class="ls-leg"><span class="ls-sw green"></span><span>≥10 (OK)</span></div>
+  </div>
+</div>
+ 
+        <div class="alert-list">
+          <!-- If you have list from backend: lowStockItems -->
+          
+          <div th:if="${lowStockItems != null}">
+            <div class="alert-item" th:each="p : ${lowStockItems}">
+              <div class="sku" th:text="${p.skuId}">SKU-101</div>
+              <div class="aname">
+                <div class="nm" th:text="${p.name}">Wireless Mouse</div>
+                <div class="sm" th:text="${p.brand}">Logitech</div>
+              </div>
+              <div class="pill red">
+    

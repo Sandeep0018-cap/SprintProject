@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orders</title>
+ 
+  <!-- keep this exactly -->
+  <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css"/>
+</head>
+ 
+<body>
+ 
+<div class="orders-page">
+ 
+  <div class="orders-header">
+    <h1 class="orders-title">Orders</h1>
+    <p class="orders-sub">Track and manage customer orders</p>
+  </div>
+ 
+  <div class="orders-card">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th>Reference</th>
+          <th>Status</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+ 
+      <tbody>
+ 
+        <!-- Case 1: model attribute name = orders -->
+        <tr th:if="${orders != null}" th:each="o, i : ${orders}">
+          <td class="col-num" th:text="${i.count}">1</td>
+ 
+          <td class="ref" th:text="${o.reference != null ? o.reference : 'ORD'}">
+            ORD-2026-0001
+          </td>
+ 
+          <!-- STATUS (NO functions, NO ternary chains) -->
+          <td>
+            <span class="status pending" th:if="${o.status == 'PENDING'}">PENDING</span>
+            <span class="status intransit" th:if="${o.status == 'INTRANSIT' or o.status == 'IN_TRANSIT'}">INTRANSIT</span>
+            <span class="status delivered" th:if="${o.status == 'DELIVERED'}">DELIVERED</span>
+            <span class="status cancelled" th:if="${o.status == 'CANCELLED'}">CANCELLED</span>
+ 
+            <!-- fallback: show original status text if it's different -->
+            <span class="status unknown"
+                  th:if="${o.status != null and o.status != 'PENDING' and o.status != 'INTRANSIT' and o.status != 'IN_TRANSIT' and o.status != 'DELIVERED' and o.status != 'CANCELLED'}"
+                  th:text="${o.status}">
+              UNKNOWN
+            </span>
+ 
+            <span class="status unknown" th:if="${o.status == null}">UNKNOWN</span>
+          </td>
+ 
+          <!-- CREATED (safe) -->
+          <td class="created"
+              th:text="${o.createdAt != null ? #temporals.format(o.createdAt,'dd MMM yyyy HH:mm') : ''}">
+            03 Feb 2026 16:53
+          </td>
+        </tr>
+ 
+        <!-- Case 2: model attribute name = orderList -->
+        <tr th:if="${orders == null and orderList != null}" th:each="o, i : ${orderList}">
+          <td class="col-num" th:text="${i.count}">1</td>
+ 
+          <td class="ref" th:text="${o.reference != null ? o.reference : 'ORD'}">
+            ORD-2026-0001
+          </td>
+ 
+          <td style="text-align:centre;">
+            <span class="status pending" th:if="${o.status == 'PENDING'}">PENDING</span>
+            <span class="status intransit" th:if="${o.status == 'INTRANSIT' or o.status == 'IN_TRANSIT'}">INTRANSIT</span>
+            <span class="status delivered" th:if="${o.status == 'DELIVERED'}">DELIVERED</span>
+            <span class="status cancelled" th:if="${o.status == 'CANCELLED'}">CANCELLED</span>
+ 
+            <span class="status unknown"
+                  th:if="${o.status != null and o.status != 'PENDING' and o.status != 'INTRANSIT' and o.status != 'IN_TRANSIT' and o.status != 'DELIVERED' and o.status != 'CANCELLED'}"
+                  th:text="${o.status}">
+              UNKNOWN
+            </span>
+ 
+            <span class="status unknown" th:if="${o.status == null}">UNKNOWN</span>
+          </td>
+ 
+          <td class="created"
+              th:text="${o.createdAt != null ? #temporals.format(o.createdAt,'dd MMM yyyy HH:mm') : ''}">
+            03 Feb 2026 16:53
+          </td>
+        </tr>
+ 
+        <!-- Empty State -->
+        <tr th:if="${(orders == null or #lists.isEmpty(orders)) and (orderList == null or #lists.isEmpty(orderList))}">
+          <td colspan="4" style="padding:18px 16px;color:rgba(255,255,255,.70);">
+            No orders found.
+          </td>
+        </tr>
+ 
+      </tbody>
+    </table>
+  </div>
+ 
+</div>
+ 
+</body>
+</html>
+ 

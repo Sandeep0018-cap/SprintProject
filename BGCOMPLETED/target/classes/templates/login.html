@@ -1,0 +1,144 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Login • SprintDB</title>
+<link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="inv-login-wrap">
+<div class="inv-login-shell">
+<!-- LEFT HERO (Inventory vibe) -->
+<section class="inv-hero">
+<div class="inv-hero-top">
+<div class="inv-pill">
+<span class="inv-dot"></span>
+<span>Inventory • Orders • Tracking</span>
+</div>
+<div class="inv-brand">
+<div class="inv-logo">SB</div>
+<div>
+<div class="inv-brand-title">SprintDB</div>
+<div class="inv-brand-sub">Order Inventory System</div>
+</div>
+</div>
+</div>
+<h1 class="inv-title">
+
+        Scan Stock.<br/>
+
+        Dispatch Orders.<br/>
+
+        Control Inventory.
+</h1>
+<p class="inv-desc">
+
+        Category → Brand → Product drill-down, sold quantity, low stock alerts and customer purchases.
+</p>
+<div class="inv-chips">
+<span class="inv-chip teal">📦 In Stock</span>
+<span class="inv-chip amber">🧾 Orders</span>
+<span class="inv-chip red">⚠ Low Stock</span>
+</div>
+<div class="inv-barcode">
+<div class="inv-scanline"></div>
+</div>
+<div class="inv-kpis">
+<div class="inv-kpi">
+<div class="inv-kpi-num" th:text="${kpiProducts} ?: 150">150</div>
+<div class="inv-kpi-lbl">Products</div>
+</div>
+<div class="inv-kpi">
+<div class="inv-kpi-num" th:text="${kpiCategories} ?: 15">15</div>
+<div class="inv-kpi-lbl">Categories</div>
+</div>
+<div class="inv-kpi">
+<div class="inv-kpi-num" th:text="${kpiBrands} ?: 18">18</div>
+<div class="inv-kpi-lbl">Brands</div>
+</div>
+</div>
+<div class="inv-creds">
+<div><b>Admin:</b> admin / admin123</div>
+<div><b>Staff:</b> staff / staff123</div>
+</div>
+</section>
+<!-- RIGHT FORM -->
+<section class="inv-form">
+<div class="inv-form-head">
+<h2>Sign in</h2>
+<p>Choose role and login</p>
+</div>
+<div class="inv-role-toggle">
+<button type="button" class="role active" id="roleAdmin">Admin</button>
+<button type="button" class="role" id="roleStaff">Staff</button>
+</div>
+<div th:if="${param.error}" class="inv-alert red">Invalid username or password</div>
+<div th:if="${param.logout}" class="inv-alert teal">Logged out successfully</div>
+<form th:action="@{/login}" method="post" class="inv-form-body">
+<label class="inv-label">Username</label>
+<div class="inv-input-wrap">
+<span class="inv-ic">👤</span>
+<input class="inv-input" id="username" name="username" placeholder="admin / staff" required>
+</div>
+<label class="inv-label">Password</label>
+<div class="inv-input-wrap">
+<span class="inv-ic">🔒</span>
+<input class="inv-input" name="password" type="password" placeholder="••••••••" required>
+</div>
+<button class="inv-btn" type="submit">
+
+          Sign in <span class="inv-arrow">➜</span>
+</button>
+<div class="inv-note">
+
+          Teal = stock • Amber = orders • Red = low stock
+</div>
+</form>
+<div class="inv-footer-tags">
+<span class="tag">SKU</span>
+<span class="tag">Stock</span>
+<span class="tag">Sold Qty</span>
+<span class="tag">Customers</span>
+</div>
+</section>
+</div>
+</div>
+<!-- Auto-fill role (optional) -->
+<script>
+
+  const roleAdmin = document.getElementById('roleAdmin');
+
+  const roleStaff = document.getElementById('roleStaff');
+
+  const user = document.getElementById('username');
+
+  roleAdmin.addEventListener('click', () => {
+
+    roleAdmin.classList.add('active');
+
+    roleStaff.classList.remove('active');
+
+    user.value = "admin";
+
+    user.focus();
+
+  });
+
+  roleStaff.addEventListener('click', () => {
+
+    roleStaff.classList.add('active');
+
+    roleAdmin.classList.remove('active');
+
+    user.value = "staff";
+
+    user.focus();
+
+  });
+</script>
+</body>
+</html>
+
+
+ 
