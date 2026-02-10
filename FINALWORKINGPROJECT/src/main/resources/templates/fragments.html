@@ -51,6 +51,7 @@
                     </a>
                 </li>
 
+<<<<<<< HEAD
                 <!-- ADMIN ONLY: Manage Categories -->
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:href="@{/admin/categories}">
@@ -65,6 +66,8 @@
                     </a>
                 </li>
 
+=======
+>>>>>>> 4dae07659c187a62e65e7087a60de0d7f1af2310
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:href="@{/customers/list}">
                         <i class="bi bi-people me-1"></i>Customers
@@ -77,6 +80,18 @@
                     </a>
                 </li>
 
+<<<<<<< HEAD
+=======
+                <!-- Payments removed for STAFF -->
+                <!--
+                <li class="nav-item" sec:authorize="hasRole('STAFF')">
+                    <a class="nav-link" th:href="@{/payments}">
+                        <i class="bi bi-credit-card me-1"></i>Payments
+                    </a>
+                </li>
+                -->
+
+>>>>>>> 4dae07659c187a62e65e7087a60de0d7f1af2310
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/orders}">
                         <i class="bi bi-box-arrow-in-right me-1"></i>Orders

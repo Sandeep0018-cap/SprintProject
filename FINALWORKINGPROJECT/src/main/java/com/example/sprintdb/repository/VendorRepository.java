@@ -11,7 +11,11 @@ public interface VendorRepository extends JpaRepository<Vendor, Long> {
 
     // ✅ Minimal helper: fetch the first vendor (used as fallback)
     Optional<Vendor> findFirstByOrderByVendorIdAsc();
+<<<<<<< HEAD
     
     // ✅ Find vendor by name (case-insensitive)
     Optional<Vendor> findByNameIgnoreCase(String name);
 }
+=======
+}
+>>>>>>> 4dae07659c187a62e65e7087a60de0d7f1af2310
