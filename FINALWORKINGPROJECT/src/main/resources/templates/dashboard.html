@@ -1,0 +1,671 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Dashboard')}"></head>
+<body>
+
+<div th:replace="~{fragments :: nav}"></div>
+
+<div class="container py-4">
+
+  <!-- Welcome banner (once after login) -->
+  <div th:if="${showWelcome}" class="welcome-banner mb-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="display-6 accent"><i class="bi bi-emoji-smile"></i></div>
+      <div class="flex-grow-1">
+        <div class="h4 fw-bold mb-0" th:text="${welcomeRole ?: 'Welcome'}">Welcome</div>
+        <div class="text-muted">Have a great day ahead!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header + Notifications bell (split-button) -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <h1 class="h3 section-title m-0">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </h1>
+      <span class="badge text-bg-light border" th:text="${loginRole ?: 'User'}">Role</span>
+    </div>
+
+    <!-- 🔔 Bell split-button: bell = refresh/go dashboard, caret = dropdown -->
+    <div class="btn-group" id="notifBellGroup">
+      <!-- Bell button -->
+      <button type="button"
+              class="btn btn-light position-relative notif-bell-btn"
+              onclick="handleBellClick(event)"
+              aria-label="Notifications">
+        <i class="bi bi-bell text-danger"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              th:text="${lowStockCount ?: 0}">0</span>
+      </button>
+      <!-- Dropdown toggle -->
+      <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" id="notifBell"
+              data-bs-toggle="dropdown" aria-expanded="false" aria-label="Toggle notifications dropdown">
+        <span class="visually-hidden">Toggle notifications dropdown</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end p-2"
+          aria-labelledby="notifBell"
+          style="min-width:360px; max-height:360px; overflow:auto;">
+        <li th:each="a : ${lowStockAlerts}">
+          <div class="d-flex align-items-center gap-2 px-2 py-2 rounded"
+               th:classappend="${a.severity == 'RED'}    ? ' bg-light border-start border-4 border-danger' :
+                               (${a.severity == 'ORANGE'} ? ' bg-light border-start border-4 border-warning' : ' bg-light border-start border-4 border-success')">
+            <div class="flex-grow-1">
+              <div class="fw-semibold" th:text="${(a.brand ?: '') + ' ' + (a.name ?: '')}">Item</div>
+              <div class="small text-muted">
+                Available:
+                <span class="badge"
+                      th:classappend="${a.availableQty != null && a.availableQty <= 4}  ? ' bg-danger' :
+                                      (${a.availableQty != null && a.availableQty <= 10} ? ' bg-warning' : ' bg-success')"
+                      th:text="${a.availableQty ?: 0}">0</span>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li th:if="${#lists.isEmpty(lowStockAlerts)}" class="px-2 py-1 text-muted">No low-stock alerts.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Full-width low-stock alerts + Close all -->
+  <div class="mb-3" id="lowStockArea">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="fw-semibold">Low-stock alerts</div>
+      <button class="btn btn-sm btn-outline-secondary" type="button" onclick="closeAllAlerts()">Close all</button>
+    </div>
+
+    <div th:each="a : ${lowStockAlerts}"
+         class="alert d-flex justify-content-between align-items-center"
+         th:classappend="${a.severity == 'RED'} ? ' alert-danger' :
+                         (${a.severity == 'ORANGE'} ? ' alert-warning' : ' alert-success')">
+      <div>
+        <strong th:text="${(a.brand ?: '') + ' ' + (a.name ?: '')}">Item</strong>
+        <span class="ms-2">is low on stock:</span>
+        <span class="badge"
+              th:classappend="${a.availableQty != null && a.availableQty <= 4}  ? ' bg-danger' :
+                              (${a.availableQty != null && a.availableQty <= 10} ? ' bg-warning' : ' bg-success')"
+              th:text="${a.availableQty ?: 0}">0</span>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.alert').remove()"></button>
+    </div>
+
+    <div th:if="${#lists.isEmpty(lowStockAlerts)}" class="alert alert-info mb-0">No low-stock alerts right now.</div>
+  </div>
+
+  <!-- Quick tiles -->
+  <div class="row g-3 mb-4">
+    <!-- Orders -->
+    <div class="col-md-3 col-sm-6">
+      <button type="button"
+              class="stat-tile d-flex align-items-center gap-3 p-3 border rounded shadow-sm w-100 text-start hover-tile"
+              onclick="window.location.href='/orders'" aria-label="Go to Orders">
+        <div class="display-6 text-primary">
+          <i class="bi bi-box-arrow-in-right"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold text-dark">Orders</div>
+          <div class="text-muted small">Track by status</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Payments -->
+    <div class="col-md-3 col-sm-6">
+      <button type="button"
+              class="stat-tile d-flex align-items-center gap-3 p-3 border rounded shadow-sm w-100 text-start hover-tile"
+              onclick="window.location.href='/payments'" aria-label="Go to Payments">
+        <div class="display-6 text-success">
+          <i class="bi bi-credit-card"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold text-dark">Payments</div>
+          <div class="text-muted small">Modes &amp; totals</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Restock (STAFF) -->
+    <div class="col-md-3 col-sm-6" sec:authorize="hasRole('STAFF')">
+      <button type="button"
+              class="stat-tile d-flex align-items-center gap-3 p-3 border rounded shadow-sm w-100 text-start hover-tile"
+              onclick="window.location.href='/staff/restock/new'" aria-label="Create Restock">
+        <div class="display-6 text-success">
+          <i class="bi bi-truck"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold text-dark">Restock Requests</div>
+          <div class="text-muted small">Create vendor restock</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Categories -->
+    <div class="col-md-3 col-sm-6">
+      <button type="button"
+              class="stat-tile d-flex align-items-center gap-3 p-3 border rounded shadow-sm w-100 text-start hover-tile"
+              onclick="window.location.href='/categories'" aria-label="Go to Categories">
+        <div class="display-6 text-warning">
+          <i class="bi bi-grid"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold text-dark">Categories</div>
+          <div class="text-muted small">Browse inventory</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ======== CHARTS (ADMIN ONLY | modern 2x2 cards) ======== -->
+  <div class="row g-3 mb-4" sec:authorize="hasRole('ADMIN')">
+    <!-- Line: Monthly Sales Trends -->
+    <div class="col-12 col-lg-6">
+      <div class="card modern h-100">
+        <div class="card-header soft">
+          <span class="chip chip-line"></span>
+          <span class="fw-semibold ms-2">Monthly Sales Trends</span>
+        </div>
+        <div class="card-body">
+          <canvas id="chartMonthly" class="chart-280 w-100"></canvas>
+          <div id="msgMonthly" class="text-muted small mt-2 d-none">No data to display.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar: Brand-wise Performance -->
+    <div class="col-12 col-lg-6">
+      <div class="card modern h-100">
+        <div class="card-header soft">
+          <span class="chip chip-bar"></span>
+          <span class="fw-semibold ms-2">Brand-wise Performance</span>
+        </div>
+        <div class="card-body">
+          <canvas id="chartBrand" class="chart-280 w-100"></canvas>
+          <div id="msgBrand" class="text-muted small mt-2 d-none">No data to display.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donut: Current Inventory Status -->
+    <div class="col-12 col-lg-6">
+      <div class="card modern h-100">
+        <div class="card-header soft">
+          <span class="chip chip-donut"></span>
+          <span class="fw-semibold ms-2">Current Inventory Status</span>
+        </div>
+        <div class="card-body">
+          <canvas id="chartDonut" class="chart-280 w-100"></canvas>
+          <div id="msgDonut" class="text-muted small mt-2 d-none">No data to display.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie: Orders by Status -->
+    <div class="col-12 col-lg-6">
+      <div class="card modern h-100">
+        <div class="card-header soft">
+          <span class="chip chip-pie"></span>
+          <span class="fw-semibold ms-2">Orders by Status</span>
+        </div>
+        <div class="card-body">
+          <canvas id="chartStatus" class="chart-280 w-100"></canvas>
+          <div id="msgStatus" class="text-muted small mt-2 d-none">No data to display.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PAYMENTS TILES (ADMIN & STAFF) ======== -->
+  <!-- Admin payments section -->
+  <div class="mt-4" sec:authorize="hasRole('ADMIN')">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <h5 class="m-0"><i class="bi bi-credit-card me-1"></i> Payments Summary</h5>
+      <span class="text-muted small">(ONLINE &amp; WALLET excluded)</span>
+    </div>
+    <div id="paymentsTilesAdmin" class="row g-3"></div>
+    <div id="paymentsEmptyAdmin" class="text-muted small d-none">No payments recorded.</div>
+  </div>
+
+  <!-- Staff payments tiles -->
+  <div class="mt-4" sec:authorize="hasRole('STAFF')">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <h5 class="m-0"><i class="bi bi-credit-card me-1"></i> Payments Summary</h5>
+      <span class="text-muted small">(ONLINE &amp; WALLET excluded)</span>
+    </div>
+    <div id="paymentsTiles" class="row g-3"></div>
+    <div id="paymentsEmpty" class="text-muted small d-none">No payments recorded.</div>
+  </div>
+
+  <!-- ======== STAFF: Requested Items (what I requested for restock) ======== -->
+  <div class="mt-4" sec:authorize="hasRole('STAFF')">
+    <div th:if="${msg}" class="alert alert-success" th:text="${msg}"></div>
+    <h2 class="h5 fw-bold mb-2">Requested Items</h2>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Vendor</th>
+              <th>Qty</th>
+              <th>Status</th>
+              <th>Requested By</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:if="${myRestocks == null || #lists.isEmpty(myRestocks)}">
+              <td colspan="7" class="text-center text-muted py-3">No restock requests yet</td>
+            </tr>
+
+            <tr th:each="r : ${myRestocks}">
+              <td th:text="${r.id}">1</td>
+              <td th:text="${(r.product != null ? (r.product.brand + ' ' + r.product.name) : '')}">Product</td>
+              <td th:text="${r.vendor != null ? r.vendor.name : ''}">Vendor</td>
+              <td th:text="${r.requestedQty}">10</td>
+              <td>
+                <span class="badge"
+                      th:classappend="${r.status.name()=='PENDING' ? ' bg-warning' :
+                                      (r.status.name()=='ORDERED' ? ' bg-primary' :
+                                       (r.status.name()=='RECEIVED' ? ' bg-success' : ' bg-danger'))}"
+                      th:text="${r.status}">PENDING</span>
+              </td>
+              <td th:text="${r.createdByUsername}">staff</td>
+
+              <!-- Actions -->
+              <td class="text-end">
+                <!-- Edit -->
+                <a th:href="@{/staff/restock/{id}/edit(id=${r.id})}"
+                   class="btn btn-outline-primary btn-sm me-1">
+                  <i class="bi bi-pencil-square"></i> Edit
+                </a>
+
+                <!-- Delete -->
+                <form th:action="@{/staff/restock/{id}/delete(id=${r.id})}" method="post" class="d-inline">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  <button type="submit" class="btn btn-outline-danger btn-sm"
+                          onclick="return confirm('Delete this restock request?');">
+                    <i class="bi bi-trash"></i> Delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quick note -->
+    <div class="alert alert-secondary mt-3" th:if="${myRestocks != null}">
+      You have <strong th:text="${#lists.size(myRestocks)}">0</strong> restock request(s).
+    </div>
+  </div>
+
+</div> <!-- /.container -->
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<!-- Page scripts -->
+<script>
+  // Bell click: refresh if already on /dashboard, else navigate there
+  function handleBellClick(e) {
+    e.preventDefault();
+    const target = '/dashboard';
+    const here = window.location.pathname.replace(/\/+$/, '');
+    const there = target.replace(/\/+$/, '');
+    if (here === there) window.location.reload();
+    else window.location.href = target;
+  }
+
+  function closeAllAlerts(){
+    document.querySelectorAll('#lowStockArea .alert').forEach(el => el.remove());
+  }
+</script>
+
+<!-- Inline data-binding + charts + payments -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // ---- Data from server (safe defaults) ----
+  const monthsLabels = /*[[${monthsLabels}]]*/ [] || [];
+  const monthsValues = /*[[${monthsValues}]]*/ [] || [];
+
+  const brandLabels  = /*[[${brandLabels}]]*/ [] || [];
+  const brandValues  = /*[[${brandValues}]]*/ [] || [];
+
+  const donutLabels  = /*[[${donutLabels}]]*/ [] || [];
+  const donutValues  = /*[[${donutValues}]]*/ [] || [];
+
+  const statusLabels = /*[[${orderStatusLabels}]]*/ [] || [];
+  const statusValues = /*[[${orderStatusValues}]]*/ [] || [];
+
+  const modeMapObj   = /*[[${modeCounts}]]*/ {} || {};
+
+  // ---- Filter payments: remove ONLINE, WALLET and sort desc ----
+  const bannedModes = new Set(['ONLINE','WALLET']);
+  const payEntries  = Object.entries(modeMapObj || {}).filter(([k,_]) => !bannedModes.has(String(k).toUpperCase()));
+  payEntries.sort((a,b) => (Number(b[1])||0) - (Number(a[1])||0));
+
+  // ---- Palette & helpers ----
+  const C = {
+    blue:    'rgba(56, 97, 251, 1)',  blue20:  'rgba(56, 97, 251, .2)',
+    teal:    'rgba(45, 203, 167, 1)', teal20:  'rgba(45, 203, 167, .2)',
+    pink:    'rgba(255, 99, 132, 1)', pink20:  'rgba(255, 99, 132, .2)',
+    amber:   'rgba(255, 193, 7, 1)',  amber20: 'rgba(255, 193, 7, .2)',
+    violet:  'rgba(156, 102, 255, 1)',violet20:'rgba(156, 102, 255, .2)',
+    gray:    'rgba(117, 117, 117, 1)',gray20:  'rgba(117, 117, 117, .2)',
+    green:   'rgba(75, 192, 192, 1)', green20: 'rgba(75, 192, 192, .2)',
+    orange:  'rgba(255, 159, 64, 1)', orange20:'rgba(255, 159, 64, .2)'
+  };
+
+  const STATUS_COLOR = {
+    'PENDING':   C.amber,
+    'INTRANSIT': C.blue,
+    'DELIVERED': C.green,
+    'CANCELLED': C.pink,
+    'FAILED':    C.pink,
+    'RETURNED':  C.violet
+  };
+
+  function hasData(arr) {
+    if (!arr || !arr.length) return false;
+    return arr.some(v => (typeof v === 'number' ? v : parseFloat(v)) > 0);
+  }
+  function toggleNoData(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('d-none', !show);
+  }
+  function rupee(n) {
+    try { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n||0); }
+    catch { return `₹${(n||0).toLocaleString('en-IN')}`; }
+  }
+  function grad(ctx, c20) {
+    const g = ctx.createLinearGradient(0, 0, 0, 180);
+    g.addColorStop(0, c20);
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    return g;
+  }
+
+  // ---- 1) Line: Monthly Sales ----
+  (function renderMonthly(){
+    const canvas = document.getElementById('chartMonthly');
+    if (!canvas) return;
+    const ok = monthsLabels.length && hasData(monthsValues);
+    toggleNoData('msgMonthly', !ok);
+    if (!ok) return;
+
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: monthsLabels,
+        datasets: [{
+          label: 'Sales',
+          data: monthsValues,
+          borderColor: C.green,
+          backgroundColor: grad(ctx, C.green20),
+          fill: true,
+          tension: 0.35,
+          pointRadius: 2.5,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx) => ` ${rupee(ctx.parsed.y)}` } }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: (v)=>rupee(v) } },
+          x: { ticks: { maxRotation: 0, autoSkip: true } }
+        }
+      }
+    });
+  })();
+
+  // ---- 2) Bar: Brand-wise ----
+  (function renderBrand(){
+    const canvas = document.getElementById('chartBrand');
+    if (!canvas) return;
+    const ok = brandLabels.length && hasData(brandValues);
+    toggleNoData('msgBrand', !ok);
+    if (!ok) return;
+
+    const pal = [C.blue, C.teal, C.pink, C.amber, C.violet, C.gray, C.orange, C.green];
+
+    new Chart(canvas.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: brandLabels,
+        datasets: [{
+          label: 'Revenue',
+          data: brandValues,
+          backgroundColor: brandValues.map((_,i)=> pal[i % pal.length]),
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx)=>` ${rupee(ctx.parsed.y)}` } }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: (v)=>rupee(v) } },
+          x: { ticks: { autoSkip: true, maxRotation: 0 } }
+        }
+      }
+    });
+  })();
+
+  // ---- 3) Donut: Inventory ----
+  (function renderDonut(){
+    const canvas = document.getElementById('chartDonut');
+    if (!canvas) return;
+    const ok = donutLabels.length && hasData(donutValues);
+    toggleNoData('msgDonut', !ok);
+    if (!ok) return;
+
+    new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: donutLabels,
+        datasets: [{
+          data: donutValues,
+          backgroundColor: [C.pink, C.amber, C.green]
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '64%',
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: (ctx)=>` ${ctx.label}: ${ctx.parsed}` } }
+        }
+      }
+    });
+  })();
+
+  // ---- 4) Pie: Orders by Status ----
+  (function renderStatus(){
+    const canvas = document.getElementById('chartStatus');
+    if (!canvas) return;
+    const ok = statusLabels.length && hasData(statusValues);
+    toggleNoData('msgStatus', !ok);
+    if (!ok) return;
+
+    const bg = statusLabels.map(lbl => STATUS_COLOR[String(lbl).toUpperCase()] || C.gray);
+
+    new Chart(canvas.getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: statusLabels,
+        datasets: [{
+          data: statusValues,
+          backgroundColor: bg
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'right' },
+          tooltip: { callbacks: { label: (ctx)=>` ${ctx.label}: ${ctx.parsed}` } }
+        }
+      }
+    });
+  })();
+
+  // ---- Payments Tiles (render to any container) ----
+  function renderPaymentTiles(containerId, emptyId){
+    const wrap  = document.getElementById(containerId);
+    const empty = document.getElementById(emptyId);
+    if (!wrap) return;
+
+    wrap.innerHTML = '';
+
+    if (!payEntries.length || payEntries.every(([_,v]) => (Number(v)||0) === 0)) {
+      if (empty) empty.classList.remove('d-none');
+      return;
+    } else {
+      if (empty) empty.classList.add('d-none');
+    }
+
+    const tilePal = [C.blue, C.teal, C.pink, C.amber, C.violet, C.orange, C.green, C.gray];
+
+    payEntries.forEach(([mode, count], idx) => {
+      const col = tilePal[idx % tilePal.length];
+      const safeCount = Number(count) || 0;
+
+      const colDiv = document.createElement('div');
+      colDiv.className = 'col-12 col-sm-6 col-md-4 col-lg-3';
+
+      const card = document.createElement('div');
+      card.className = 'tile-card h-100 p-3 hover-lift';
+      card.style.borderLeft = `6px solid ${col}`;
+      card.innerHTML = `
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="tile-title">${mode}</div>
+          <div class="tile-icon" style="color:${col}"><i class="bi bi-credit-card-2-front"></i></div>
+        </div>
+        <div class="display-6 fw-bold mt-1">${safeCount}</div>
+      `;
+      colDiv.appendChild(card);
+      wrap.appendChild(colDiv);
+    });
+  }
+
+  // Staff tiles
+  renderPaymentTiles('paymentsTiles', 'paymentsEmpty');
+  // Admin tiles
+  renderPaymentTiles('paymentsTilesAdmin', 'paymentsEmptyAdmin');
+/*]]>*/
+</script>
+
+<style>
+  :root{
+    --accent: #3861FB;           /* Accent blue */
+    --card-bg: #ffffff;
+    --soft-bg: linear-gradient(180deg, rgba(56,97,251,0.08) 0%, rgba(56,97,251,0) 100%);
+    --shadow: 0 8px 22px rgba(0,0,0,.06);
+    --shadow-hover: 0 12px 28px rgba(0,0,0,.08);
+    --radius: 14px;
+  }
+
+  .accent{ color: var(--accent); }
+
+  /* 🔔 Add spacing between bell and dropdown arrow for clearer badge */
+  .notif-bell-btn { margin-right: 12px !important; }
+
+  /* Hover tiles (quick nav) */
+  .hover-tile { transition: transform .08s ease, box-shadow .08s ease; cursor: pointer; }
+  .hover-tile:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
+  .chart-280 { height: 280px; }
+
+  /* Modern cards */
+  .card.modern{
+    border: 1px solid #eef0f4;
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s ease, transform .2s ease;
+  }
+  .card.modern:hover{
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+  .card-header.soft{
+    background: var(--soft-bg);
+    border-bottom: 1px solid #eef0f4;
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    padding: .6rem .9rem;
+  }
+
+  /* Header chips */
+  .chip{
+    width: 12px; height: 12px; border-radius: 50%;
+    display: inline-block;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,.06);
+  }
+  .chip-line  { background: linear-gradient(135deg, #4dd0e1, #81c784); }
+  .chip-bar   { background: linear-gradient(135deg, #7e57c2, #64b5f6); }
+  .chip-donut { background: linear-gradient(135deg, #ffca28, #66bb6a); }
+  .chip-pie   { background: linear-gradient(135deg, #ef5350, #42a5f5); }
+
+  /* Welcome banner */
+  .welcome-banner {
+    border: 1px solid #ECECEC;
+    border-radius: 18px;
+    background: #FFF;
+    box-shadow: var(--shadow);
+    padding: 1rem 1.25rem;
+  }
+
+  /* Payments tiles are NOT clickable (Admin + Staff sections below charts) */
+  #paymentsTiles .tile-card,
+  #paymentsTilesAdmin .tile-card {
+    cursor: default !important;
+    pointer-events: none !important; /* disables clicks */
+    transition: none !important;
+    box-shadow: var(--shadow) !important;
+  }
+  #paymentsTiles .tile-card:hover,
+  #paymentsTilesAdmin .tile-card:hover {
+    transform: none !important;      /* disable hover movement */
+    box-shadow: var(--shadow) !important;
+  }
+
+  /* Payments tiles wrapper spacing remains, but no click affordance */
+  #paymentsTiles .tile-card .tile-title,
+  #paymentsTilesAdmin .tile-card .tile-title {
+    user-select: text;
+  }
+
+  /* Payments tiles (card base) */
+  .tile-card {
+    border: 1px solid #f0f2f6;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s ease, transform .2s ease;
+  }
+  .tile-card .tile-title { font-weight: 600; color: #666; }
+  .tile-card .tile-icon  { font-size: 1.15rem; }
+  .hover-lift:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+
+  /* Canvas crispness */
+  canvas { image-rendering: -webkit-optimize-contrast; }
+</style>
+
+</body>
+</html>
