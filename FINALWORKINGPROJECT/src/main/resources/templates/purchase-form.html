@@ -1,0 +1,169 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Record Sale')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+
+<div class="container py-4" style="max-width:900px;">
+  <h1 class="h3 section-title mb-3">
+    <i class="bi bi-cash-coin me-2"></i>Record Sale
+  </h1>
+
+  <div class="card">
+    <div class="card-body">
+      <!-- Form -->
+      <form th:action="@{/staff/purchases}"
+            method="post"
+            th:object="${dto}"
+            class="row g-3"
+            id="saleForm"
+            novalidate>
+
+        <!-- CSRF -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <!-- Global errors -->
+        <div class="col-12" th:if="${#fields.hasGlobalErrors()}">
+          <div class="alert alert-danger mb-0"
+               th:each="ge : ${#fields.globalErrors()}"
+               th:text="${ge}">Form error</div>
+        </div>
+
+        <!-- Customer -->
+        <div class="col-md-6">
+          <label class="form-label">Customer</label>
+          <select class="form-select"
+                  th:field="*{customerId}"
+                  th:disabled="${#lists.isEmpty(customers)}"
+                  required>
+            <option th:value="" th:selected="*{customerId} == null" disabled>Select customer</option>
+            <option th:each="c : ${customers}"
+                    th:value="${c.customerId}"
+                    th:text="${c.name + ' (' + c.city + ')'}"></option>
+          </select>
+          <div class="invalid-feedback d-block"
+               th:if="${#fields.hasErrors('customerId')}"
+               th:errors="*{customerId}">Error</div>
+          <div class="form-text" th:if="${#lists.isEmpty(customers)}">No customers found.</div>
+        </div>
+
+        <!-- Product -->
+        <div class="col-md-6">
+          <label class="form-label">Product</label>
+          <select class="form-select"
+                  th:field="*{productId}"
+                  th:disabled="${#lists.isEmpty(products)}"
+                  required>
+            <option th:value="" th:selected="*{productId} == null" disabled>Select product</option>
+            <option th:each="p : ${products}"
+                    th:value="${p.productId}"
+                    th:text="${p.brand + ' ' + p.name + ' [' + p.skuId + ']'}"></option>
+          </select>
+          <div class="invalid-feedback d-block"
+               th:if="${#fields.hasErrors('productId')}"
+               th:errors="*{productId}">Error</div>
+          <div class="form-text" th:if="${#lists.isEmpty(products)}">No products available.</div>
+        </div>
+
+        <!-- Quantity -->
+        <div class="col-md-3">
+          <label class="form-label">Quantity</label>
+          <input class="form-control"
+                 type="number"
+                 inputmode="numeric"
+                 min="1"
+                 step="1"
+                 th:field="*{quantity}"
+                 placeholder="1"
+                 required/>
+          <div class="invalid-feedback d-block"
+               th:if="${#fields.hasErrors('quantity')}"
+               th:errors="*{quantity}">Error</div>
+        </div>
+
+        <!-- Payment Mode -->
+        <div class="col-md-3">
+          <label class="form-label">Payment Mode</label>
+          <select class="form-select"
+                  th:field="*{paymentMode}"
+                  id="paymentModeSelect"
+                  required>
+            <option th:value="" th:selected="*{paymentMode} == null" disabled>Select mode</option>
+            <option th:each="m : ${modes}" th:value="${m}" th:text="${m}"></option>
+          </select>
+          <div class="invalid-feedback d-block"
+               th:if="${#fields.hasErrors('paymentMode')}"
+               th:errors="*{paymentMode}">Error</div>
+        </div>
+
+        <!-- Transaction ID -->
+        <div class="col-md-6">
+          <label class="form-label">Transaction ID <span class="text-muted">(ONLINE only)</span></label>
+          <input class="form-control"
+                 th:field="*{transactionId}"
+                 id="txnIdInput"
+                 placeholder="TXN-12345"/>
+          <div class="invalid-feedback d-block"
+               th:if="${#fields.hasErrors('transactionId')}"
+               th:errors="*{transactionId}">Error</div>
+          <div class="form-text">Required only when Payment Mode is ONLINE.</div>
+        </div>
+
+        <!-- Actions -->
+        <div class="col-12 d-flex gap-2">
+          <button class="btn btn-primary" type="submit" id="saveBtn">
+            <span class="spinner-border spinner-border-sm me-2 d-none"
+                  id="saveSpinner"
+                  role="status" aria-hidden="true"></span>
+            <i class="bi bi-check2-circle me-1"></i>Save Sale
+          </button>
+          <a class="btn btn-outline-secondary" th:href="@{/dashboard}">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+          </a>
+        </div>
+
+        <!-- Info -->
+        <div class="col-12">
+          <div class="alert alert-info mb-0">
+            Sold quantity is computed dynamically from purchase items.
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const modeSelect = document.getElementById('paymentModeSelect');
+    const txnInput   = document.getElementById('txnIdInput');
+    const form       = document.getElementById('saleForm');
+    const saveBtn    = document.getElementById('saveBtn');
+    const spinner    = document.getElementById('saveSpinner');
+
+    function syncTxnRequirement() {
+      const val = (modeSelect?.value || '').toUpperCase();
+      const online = val === 'ONLINE';
+      if (txnInput) {
+        txnInput.disabled = !online;
+        txnInput.required = online;
+      }
+    }
+
+    if (modeSelect) {
+      syncTxnRequirement();
+      modeSelect.addEventListener('change', syncTxnRequirement);
+    }
+
+    if (form && saveBtn && spinner) {
+      form.addEventListener('submit', function(){
+        saveBtn.disabled = true;
+        spinner.classList.remove('d-none');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
