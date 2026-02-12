@@ -1,0 +1,845 @@
+package com.cg.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.cg.service.CategoryService;
+
+@Controller
+@RequestMapping("/admin/categories")
+public class AdminCategoryController {
+
+    private final CategoryService categoryService;
+
+    public AdminCategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
+
+    // List all categories
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("categories", categoryService.findAll());
+        return "admin/categories"; // moved into templates/admin/
+    }
+
+    // Save updates from modal and redirect back to the main list
+    @PostMapping("/{id}/edit")
+    public String update(@PathVariable("id") Long id,
+                         @RequestParam("name") String name,
+                         RedirectAttributes ra) {
+        try {
+            categoryService.update(id, name);
+            ra.addFlashAttribute("msg", "Category updated successfully");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("err", "Update failed: " + ex.getMessage());
+        }
+        return "redirect:/admin/categories";
+    }
+
+    // Create a new category
+    @PostMapping
+    public String create(@RequestParam("name") String name, RedirectAttributes ra) {
+        try {
+            categoryService.create(name);
+            ra.addFlashAttribute("msg", "Category added successfully");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("err", "Creation failed: " + ex.getMessage());
+        }
+        return "redirect:/admin/categories";
+    }
+
+    // Delete a category
+    @DeleteMapping("/delete/{id}")
+    public String delete(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            categoryService.delete(id);
+            ra.addFlashAttribute("msg", "Category deleted successfully");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("err", "Delete failed: " + ex.getMessage());
+        }
+        return "redirect:/admin/categories";
+    }
+}
+
+
+
+
+package com.cg.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.cg.service.VendorService;
+
+@Controller
+@RequestMapping("/admin/vendors")
+public class AdminVendorController {
+
+    private final VendorService vendorService;
+
+    public AdminVendorController(VendorService vendorService) {
+        this.vendorService = vendorService;
+    }
+
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("vendors", vendorService.findAll());
+        return "admin/vendors"; // moved into templates/admin/
+    }
+
+    @PostMapping("/{id}/edit")
+    public String update(@PathVariable Long id,
+                         @RequestParam String name,
+                         @RequestParam(required = false) String contactName,
+                         @RequestParam(required = false) String phone,
+                         @RequestParam(required = false) String email,
+                         RedirectAttributes ra) {
+        try {
+            vendorService.update(id, name, contactName, phone, email);
+            ra.addFlashAttribute("msg", "Vendor updated successfully");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("err", ex.getMessage());
+        }
+        return "redirect:/admin/vendors";
+    }
+
+    @PostMapping
+    public String create(@RequestParam String name,
+                         @RequestParam(required = false) String contactName,
+                         @RequestParam(required = false) String phone,
+                         @RequestParam(required = false) String email,
+                         RedirectAttributes ra) {
+        try {
+            vendorService.create(name, contactName, phone, email);
+            ra.addFlashAttribute("msg", "Vendor added successfully");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("err", ex.getMessage());
+        }
+        return "redirect:/admin/vendors";
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            vendorService.delete(id);
+            ra.addFlashAttribute("msg", "Vendor deleted");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("err", ex.getMessage());
+        }
+        return "redirect:/admin/vendors";
+    }
+}
+
+
+
+package com.cg.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class AuthController {
+
+    @GetMapping("/login")
+    public String login() {
+        return "auth/login"; // moved into templates/auth/
+    }
+}
+
+
+package com.cg.controller;
+
+import com.cg.dto.ProductDto;
+import com.cg.service.CategoryService;
+import com.cg.service.ProductService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
+import java.util.Map;
+
+@Controller
+public class CategoryController {
+
+    private final CategoryService categoryService;
+    private final ProductService productService;
+
+    public CategoryController(CategoryService categoryService, ProductService productService) {
+        this.categoryService = categoryService;
+        this.productService = productService;
+    }
+
+    // SHOW ALL CATEGORIES (ADMIN + STAFF + USER)
+    @GetMapping("/categories")
+    public String categories(Model model) {
+        model.addAttribute("categories", categoryService.findAll());
+        return "category/categories";   // <--- FIXED
+    }
+
+    // SHOW ALL PRODUCTS INSIDE SELECTED CATEGORY
+    @GetMapping("/categories/{id}")
+    public String categoryDetail(@PathVariable Long id, Model model) {
+
+        List<ProductDto> products =
+                productService.findByCategoryWithDerivedStats(id);
+
+        Map<String, List<ProductDto>> byBrand =
+                productService.groupByBrand(products);
+
+        String categoryName = categoryService.findAll().stream()
+                .filter(c -> c.getCategoryId().equals(id))
+                .map(c -> c.getName())
+                .findFirst()
+                .orElse("Category");
+
+        model.addAttribute("categoryId", id);
+        model.addAttribute("categoryName", categoryName);
+        model.addAttribute("productsByBrand", byBrand);
+
+        return "category/category-detail";  // <--- FIXED
+    }
+}
+
+
+package com.cg.controller;
+
+import com.cg.entity.Customer;
+import com.cg.service.CustomerService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import javax.validation.Valid;
+
+@Controller
+@RequestMapping("/customers")
+public class CustomerController {
+
+    private final CustomerService customerService;
+
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
+    @GetMapping("/list") // Handles navigation to the customer directory view
+    public String list(Model model) {
+        // Aggregates client data along with their most recent transaction date/info
+        var rows = customerService.listCustomersWithLastPurchase();
+        model.addAttribute("rows", rows);
+        return "customers";
+    }
+
+    @PostMapping // Handles the submission of the new customer registration form
+    public String create(@Valid @ModelAttribute Customer customer) {
+        // Triggers validation and persistence of the customer entity
+        customerService.create(customer);
+        return "redirect:/customers/list"; 
+    }
+}
+
+
+package com.cg.controller;
+
+import com.cg.dto.ProductStockAlertDto;
+import com.cg.entity.*;
+import com.cg.enums.OrderStatus;
+import com.cg.enums.PaymentMode;
+import com.cg.repository.*;
+import com.cg.service.ProductService;
+import com.cg.service.PurchaseService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import javax.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.TextStyle;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Controller
+public class DashboardController {
+
+    private final PurchaseService purchaseService;
+    private final ProductService productService;
+    private final PurchaseItemRepository purchaseItemRepository;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final RestockRequestRepository restockRequestRepository;
+
+    public DashboardController(PurchaseService purchaseService,
+                               ProductService productService,
+                               PurchaseItemRepository purchaseItemRepository,
+                               ProductRepository productRepository,
+                               OrderRepository orderRepository,
+                               RestockRequestRepository restockRequestRepository) {
+        this.purchaseService = purchaseService;
+        this.productService = productService;
+        this.purchaseItemRepository = purchaseItemRepository;
+        this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.restockRequestRepository = restockRequestRepository;
+    }
+
+    @GetMapping("/dashboard") // Orchestrates data for the primary analytical landing page
+    public String dashboard(Model model, Authentication auth, HttpSession session) {
+        boolean isAdmin = hasRole(auth, "ROLE_ADMIN"); // Checks for administrative privileges
+        boolean isStaff = hasRole(auth, "ROLE_STAFF"); // Checks for staff-level access
+
+        // Manages a one-time welcome message state per user session
+        if (session.getAttribute("WELCOME_SHOWN") == null) {
+            session.setAttribute("WELCOME_SHOWN", Boolean.TRUE);
+            model.addAttribute("showWelcome", true);
+            model.addAttribute("welcomeRole", isAdmin ? "Welcome Admin" : (isStaff ? "Welcome Staff" : "Welcome"));
+        }
+        model.addAttribute("loginRole", isAdmin ? "Admin Login" : (isStaff ? "Staff Login" : "User"));
+
+        // Retrieves a list of products falling below the defined threshold
+        List<ProductStockAlertDto> alerts = productService.lowStockSummary(10);
+        model.addAttribute("lowStockAlerts", alerts);
+        model.addAttribute("lowStockCount", alerts.size());
+
+        // Aggregates counts for every possible order status for charting
+        Map<String, Long> orderStatusCounts = new LinkedHashMap<>();
+        Arrays.stream(OrderStatus.values()).forEach(s -> orderStatusCounts.put(s.name(), 0L));
+        orderRepository.findAll().forEach(o ->
+                orderStatusCounts.computeIfPresent(o.getStatus().name(), (k, v) -> v + 1));
+        model.addAttribute("orderStatusLabels", new ArrayList<>(orderStatusCounts.keySet()));
+        model.addAttribute("orderStatusValues", new ArrayList<>(orderStatusCounts.values()));
+
+        // Initializes a 12-month rolling window for financial reporting
+        YearMonth thisMonth = YearMonth.now();
+        Map<YearMonth, Double> revenueByMonth = new LinkedHashMap<>();
+        for (int i = 11; i >= 0; i--) revenueByMonth.put(thisMonth.minusMonths(i), 0.0);
+
+        List<PurchaseItem> allItems = purchaseItemRepository.findAll();
+        allItems.forEach(pi -> {
+            if (pi.getPurchase() == null || pi.getPurchase().getCreatedAt() == null) return;
+            YearMonth ym = YearMonth.from(pi.getPurchase().getCreatedAt().toLocalDate());
+            if (revenueByMonth.containsKey(ym)) {
+                // Calculates item total with null-safety and updates monthly bucket
+                double add = nz(pi.getUnitPrice()) * nzi(pi.getQuantity());
+                revenueByMonth.put(ym, revenueByMonth.get(ym) + add);
+            }
+        });
+        
+        // Formats month keys into readable labels (e.g., "Jan 2024")
+        model.addAttribute("monthsLabels", revenueByMonth.keySet().stream()
+                .map(ym -> ym.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + " " + ym.getYear())
+                .collect(Collectors.toList()));
+        model.addAttribute("monthsValues", new ArrayList<>(revenueByMonth.values()));
+
+        // Calculates total revenue generated per manufacturer brand
+        Map<String, Double> revenueByBrand = new HashMap<>();
+        allItems.forEach(pi -> {
+            String brand = (pi.getProduct() != null && pi.getProduct().getBrand() != null) ? pi.getProduct().getBrand() : "Unknown";
+            revenueByBrand.merge(brand, nz(pi.getUnitPrice()) * nzi(pi.getQuantity()), Double::sum);
+        });
+        
+        // Sorts brands by revenue descending to highlight top performers
+        Map<String, Double> brandSorted = revenueByBrand.entrySet().stream()
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+        model.addAttribute("brandLabels", new ArrayList<>(brandSorted.keySet()));
+        model.addAttribute("brandValues", new ArrayList<>(brandSorted.values()));
+
+        // Groups sales volume by product ID to determine real-time availability
+        Map<Long, Integer> soldByProduct = allItems.stream()
+                .filter(pi -> pi.getProduct() != null)
+                .collect(Collectors.groupingBy(pi -> pi.getProduct().getProductId(), Collectors.summingInt(PurchaseItem::getQuantity)));
+        
+        int red = 0, orange = 0, green = 0;
+        for (Product p : productRepository.findAll()) {
+            int available = nzi(p.getStockQty()) - soldByProduct.getOrDefault(p.getProductId(), 0);
+            if (available <= 4) red++; // Critical stock level
+            else if (available <= 10) orange++; // Warning stock level
+            else green++; // Healthy stock level
+        }
+        model.addAttribute("donutLabels", Arrays.asList("0–4 (Low)", "5–10 (Med)", "≥10 (OK)"));
+        model.addAttribute("donutValues", Arrays.asList(red, orange, green));
+
+        // Populates counts for various payment methods (Card, Cash, etc.)
+        Map<String, Long> raw = purchaseService.paymentModeCounts();
+        Map<String, Long> modeCounts = new LinkedHashMap<>();
+        Arrays.stream(PaymentMode.values()).forEach(m -> modeCounts.put(m.name(), raw.getOrDefault(m.name(), 0L)));
+        model.addAttribute("modeCounts", modeCounts);
+
+        // Filters and sorts restock requests specifically created by the logged-in staff member
+        if (isStaff) {
+            String username = auth != null ? auth.getName() : null;
+            model.addAttribute("myRestocks", username == null ? Collections.emptyList() :
+                    restockRequestRepository.findAll().stream()
+                            .filter(r -> username.equals(r.getCreatedByUsername()))
+                            .sorted(Comparator.comparingLong(RestockRequest::getId).reversed())
+                            .collect(Collectors.toList()));
+        }
+
+        return "dashboard";
+    }
+
+    private boolean hasRole(Authentication auth, String role) { // Validates user permissions against a specific role string
+        return auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
+    }
+
+    private double nz(Double d) { return d == null ? 0.0 : d; } // "Null to Zero" for Double values
+    private int nzi(Integer i) { return i == null ? 0 : i; }   // "Null to Zero" for Integer values
+}
+
+
+package com.cg.controller;
+
+import com.cg.entity.Order;
+import com.cg.enums.OrderStatus;
+import com.cg.repository.OrderRepository;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.util.Arrays;
+import java.util.List;
+
+@Controller
+public class OrdersController {
+
+    private final OrderRepository orderRepository;
+
+    public OrdersController(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+
+    @GetMapping("/orders") // Entry point for viewing and filtering transaction history
+    public String orders(@RequestParam(name = "status", required = false) String status, Model model) {
+        List<Order> orders;
+
+        // Determines whether to fetch the full dataset or a subset filtered by state
+        if (status == null || status.equalsIgnoreCase("ALL")) {
+            orders = orderRepository.findAll();
+        } else {
+            // Converts the URL string parameter into a typed Enum for safe database querying
+            OrderStatus st = OrderStatus.valueOf(status.toUpperCase());
+            orders = orderRepository.findByStatusOrderByOrderIdDesc(st);
+        }
+
+        model.addAttribute("selectedStatus", status == null ? "ALL" : status.toUpperCase()); // Tracks current filter for UI active states
+        model.addAttribute("statuses", Arrays.asList("ALL", "PENDING", "INTRANSIT", "DELIVERED", "CANCELLED")); // Provides the filter toggle options
+        model.addAttribute("orders", orders); // Passes the resulting list to the view template
+        
+        return "orders";
+    }
+}
+
+
+package com.cg.controller;
+
+import com.cg.enums.PaymentMode;
+import com.cg.service.PurchaseService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@Controller
+public class PaymentsController {
+
+    private final PurchaseService purchaseService;
+
+    public PaymentsController(PurchaseService purchaseService) {
+        this.purchaseService = purchaseService;
+    }
+
+    @GetMapping("/payments") // Entry point for the financial transaction overview
+    public String payments(Model model) {
+        // Retrieves raw transaction counts categorized by their payment identifiers
+        Map<String, Long> raw = purchaseService.paymentModeCounts();
+        Map<String, Long> modeCounts = new LinkedHashMap<>();
+
+        // Synchronizes every defined payment enum with the results to ensure zero-count visibility
+        Arrays.stream(PaymentMode.values()).forEach(m -> 
+            modeCounts.put(m.name(), raw.getOrDefault(m.name(), 0L))
+        );
+
+        model.addAttribute("modeCounts", modeCounts); // Binds the synchronized map to the UI layer
+        return "payments";
+    }
+}
+
+
+package com.cg.controller;
+
+import com.cg.dto.ProductDto;
+import com.cg.repository.CategoryRepository;
+import com.cg.repository.VendorRepository;
+import com.cg.service.ProductService;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import javax.validation.Valid;
+
+@Controller
+@RequestMapping("/products")
+public class ProductController {
+
+    private final ProductService productService;
+    private final CategoryRepository categoryRepository;
+    private final VendorRepository vendorRepository;
+
+    public ProductController(ProductService productService,
+                             CategoryRepository categoryRepository,
+                             VendorRepository vendorRepository) {
+        this.productService = productService;
+        this.categoryRepository = categoryRepository;
+        this.vendorRepository = vendorRepository;
+    }
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+    }
+
+    @GetMapping(path = "/new", produces = MediaType.TEXT_HTML_VALUE)
+    public String newProduct(@RequestParam("categoryId") Long categoryId, Model model) {
+        if (!model.containsAttribute("product")) {
+            model.addAttribute("product", new ProductDto());
+        }
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("vendors", vendorRepository.findAll());
+        return "products/product-form"; // moved into templates/products/
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String create(@Valid @ModelAttribute("product") ProductDto product,
+                         BindingResult binding,
+                         @RequestParam(value = "categoryId", required = false) Long categoryId,
+                         RedirectAttributes ra,
+                         Model model) {
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("vendors", vendorRepository.findAll());
+        if (categoryId == null) {
+            model.addAttribute("error", "Missing category. Please start from the category page and try again.");
+            return "products/product-form";
+        }
+        if (product.getVendorId() == null) {
+            binding.rejectValue("vendorId", "NotNull", "Vendor is required");
+        }
+        if (binding.hasErrors()) {
+            return "products/product-form";
+        }
+        try {
+            productService.createOrUpdate(product, categoryId);
+        } catch (DataIntegrityViolationException ex) {
+            String msg = getRootMessage(ex).toLowerCase();
+            if (msg.contains("duplicate") || msg.contains("uk_") || msg.contains("unique")) {
+                binding.rejectValue("skuId", "sku.duplicate", "SKU already exists");
+            } else {
+                model.addAttribute("error", "Could not save product: " + getRootMessage(ex));
+            }
+            return "products/product-form";
+        }
+        ra.addFlashAttribute("success", "Product added successfully");
+        return "redirect:/categories/" + categoryId;
+    }
+
+    @GetMapping(path = "/{id}/edit", produces = MediaType.TEXT_HTML_VALUE)
+    public String edit(@PathVariable Long id,
+                       @RequestParam(value = "categoryId", required = false) Long categoryId,
+                       Model model,
+                       RedirectAttributes ra) {
+        try {
+            ProductDto dto = productService.getByIdAsDto(id);
+            Long resolvedCategoryId = (categoryId != null) ? categoryId : dto.getCategoryId();
+            model.addAttribute("product", dto);
+            model.addAttribute("categoryId", resolvedCategoryId);
+            model.addAttribute("vendors", vendorRepository.findAll());
+            return "products/product-form";
+        } catch (RuntimeException ex) {
+            ra.addFlashAttribute("error", "Product not found or cannot be loaded.");
+            return "redirect:/categories/" + (categoryId != null ? categoryId : 0L);
+        }
+    }
+
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String update(@PathVariable("id") Long id,
+                         @Valid @ModelAttribute("product") ProductDto product,
+                         BindingResult binding,
+                         @RequestParam(value = "categoryId", required = false) Long categoryId,
+                         RedirectAttributes ra,
+                         Model model) {
+        product.setProductId(id);
+        Long resolvedCategoryId = (categoryId != null) ? categoryId : product.getCategoryId();
+        model.addAttribute("categoryId", resolvedCategoryId);
+        model.addAttribute("vendors", vendorRepository.findAll());
+        if (resolvedCategoryId == null) {
+            binding.reject("category.required", "Missing category context.");
+        }
+        if (binding.hasErrors()) {
+            return "products/product-form";
+        }
+        try {
+            productService.createOrUpdate(product, resolvedCategoryId);
+        } catch (DataIntegrityViolationException ex) {
+            handleDuplicateSku(ex, binding, model);
+            return "products/product-form";
+        }
+        ra.addFlashAttribute("success", "Product updated successfully");
+        return "redirect:/categories/" + resolvedCategoryId;
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public String delete(@PathVariable Long id,
+                         @RequestParam("categoryId") Long categoryId,
+                         RedirectAttributes ra) {
+        try {
+            productService.delete(id);
+            ra.addFlashAttribute("success", "Product deleted");
+        } catch (DataIntegrityViolationException ex) {
+            ra.addFlashAttribute("error", "Cannot delete product with existing sales/purchase history.");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("error", "Deletion failed: " + getRootMessage(ex));
+        }
+        return "redirect:/categories/" + categoryId;
+    }
+
+    private String getRootMessage(Throwable t) {
+        Throwable c = t;
+        while (c.getCause() != null) c = c.getCause();
+        return c.getMessage() != null ? c.getMessage() : t.getMessage();
+    }
+
+    private void handleDuplicateSku(org.springframework.dao.DataIntegrityViolationException ex,
+                                    BindingResult binding, Model model) {
+        String msg = getRootMessage(ex).toLowerCase();
+        if (msg.contains("duplicate") || msg.contains("uk_") || msg.contains("unique")) {
+            binding.rejectValue("skuId", "sku.duplicate", "SKU already exists");
+        } else {
+            model.addAttribute("error", "Update failed: " + getRootMessage(ex));
+        }
+    }
+}
+
+
+package com.cg.controller;
+
+import com.cg.dto.PurchaseCreateDto;
+import com.cg.enums.PaymentMode;
+import com.cg.repository.CustomerRepository;
+import com.cg.repository.ProductRepository;
+import com.cg.service.PurchaseService;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import javax.validation.Valid;
+
+@Controller
+@RequestMapping("/staff/purchases")
+public class PurchaseController {
+
+    private final PurchaseService purchaseService;
+    private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
+
+    public PurchaseController(PurchaseService purchaseService,
+                              CustomerRepository customerRepository,
+                              ProductRepository productRepository) {
+        this.purchaseService = purchaseService;
+        this.customerRepository = customerRepository;
+        this.productRepository = productRepository;
+    }
+
+    @GetMapping("/new")
+    public String form(Model model) {
+        if (!model.containsAttribute("dto")) {
+            model.addAttribute("dto", new PurchaseCreateDto());
+        }
+        populateFormMetadata(model);
+        return "staff/purchase-form"; // moved into templates/staff/
+    }
+
+    @PostMapping
+    public String create(@Valid @ModelAttribute("dto") PurchaseCreateDto dto,
+                         BindingResult binding,
+                         Authentication auth,
+                         Model model,
+                         RedirectAttributes ra) {
+
+        boolean needsTxnId = dto.getPaymentMode() == PaymentMode.CARD
+                          || dto.getPaymentMode() == PaymentMode.NETBANKING;
+        if (needsTxnId && (dto.getTransactionId() == null || dto.getTransactionId().isBlank())) {
+            binding.rejectValue("transactionId", "NotBlank",
+                    "Transaction ID is required for CARD/NETBANKING payments");
+        }
+
+        if (binding.hasErrors()) {
+            populateFormMetadata(model);
+            return "staff/purchase-form";
+        }
+
+        String username = (auth != null) ? auth.getName() : "staff";
+        purchaseService.createPurchase(dto, username);
+        ra.addFlashAttribute("success", "Sale recorded successfully");
+        return "redirect:/dashboard";
+    }
+
+    private void populateFormMetadata(Model model) {
+        model.addAttribute("customers", customerRepository.findAll());
+        model.addAttribute("products", productRepository.findAll());
+        model.addAttribute("modes", com.cg.enums.PaymentMode.values());
+    }
+}
+
+package com.cg.controller;
+
+import com.cg.dto.RestockDto;
+import com.cg.entity.RestockRequest;
+import com.cg.enums.RestockStatus;
+import com.cg.repository.ProductRepository;
+import com.cg.repository.RestockRequestRepository;
+import com.cg.repository.VendorRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import javax.validation.Valid;
+import java.util.Collections;
+
+@Controller
+@RequestMapping("/staff/restock")
+public class RestockController {
+
+    private final VendorRepository vendorRepository;
+    private final ProductRepository productRepository;
+    private final RestockRequestRepository restockRequestRepository;
+
+    public RestockController(VendorRepository vendorRepository,
+                             ProductRepository productRepository,
+                             RestockRequestRepository restockRequestRepository) {
+        this.vendorRepository = vendorRepository;
+        this.productRepository = productRepository;
+        this.restockRequestRepository = restockRequestRepository;
+    }
+
+    @GetMapping("/new")
+    public String form(@RequestParam(value = "vendorId", required = false) Long vendorId, Model model) {
+        RestockDto req = (RestockDto) model.getAttribute("req");
+        if (req == null) {
+            req = new RestockDto();
+            req.setVendorId(vendorId);
+            req.setRequestedQty(1);
+        }
+        populateRestockModel(model, req, vendorId, false);
+        return "staff/restock-form"; // moved into templates/staff/
+    }
+
+    @PostMapping
+    public String create(@Valid @ModelAttribute("req") RestockDto req,
+                         BindingResult binding,
+                         Authentication auth,
+                         Model model,
+                         RedirectAttributes ra) {
+        if (validateAndProcess(req, binding)) {
+            populateRestockModel(model, req, req.getVendorId(), false);
+            return "staff/restock-form";
+        }
+        RestockRequest rr = new RestockRequest();
+        rr.setProduct(productRepository.getById(req.getProductId()));
+        rr.setVendor(vendorRepository.getById(req.getVendorId()));
+        rr.setRequestedQty(req.getRequestedQty());
+        rr.setStatus(RestockStatus.PENDING);
+        rr.setCreatedByUsername(auth != null ? auth.getName() : "system");
+        restockRequestRepository.save(rr);
+        ra.addFlashAttribute("msg", "Restock request submitted!");
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable Long id, Model model) {
+        RestockRequest rr = restockRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not found: " + id));
+        RestockDto form = new RestockDto();
+        form.setId(rr.getId());
+        form.setProductId(rr.getProduct().getProductId());
+        form.setVendorId(rr.getVendor().getVendorId());
+        form.setRequestedQty(rr.getRequestedQty());
+        populateRestockModel(model, form, form.getVendorId(), true);
+        return "staff/restock-form";
+    }
+
+    @PostMapping("/update/{id}")
+    public String update(@PathVariable Long id,
+                         @Valid @ModelAttribute("req") RestockDto req,
+                         BindingResult binding,
+                         RedirectAttributes ra,
+                         Model model) {
+        RestockRequest rr = restockRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not found: " + id));
+        if (validateAndProcess(req, binding)) {
+            populateRestockModel(model, req, req.getVendorId(), true);
+            return "staff/restock-form";
+        }
+        rr.setProduct(productRepository.getById(req.getProductId()));
+        rr.setVendor(vendorRepository.getById(req.getVendorId()));
+        rr.setRequestedQty(req.getRequestedQty());
+        restockRequestRepository.save(rr);
+        ra.addFlashAttribute("msg", "Restock request updated!");
+        return "redirect:/dashboard";
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        RestockRequest rr = restockRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not found: " + id));
+        if (rr.getStatus() != RestockStatus.PENDING) {
+            ra.addFlashAttribute("error", "Only PENDING requests can be deleted.");
+            return "redirect:/dashboard";
+        }
+        restockRequestRepository.delete(rr);
+        ra.addFlashAttribute("msg", "Restock request deleted!");
+        return "redirect:/dashboard";
+    }
+
+    private void populateRestockModel(Model model, RestockDto req, Long vendorId, boolean isEdit) {
+        model.addAttribute("vendors", vendorRepository.findAll());
+        model.addAttribute("selectedVendorId", vendorId);
+        model.addAttribute("products", vendorId != null
+                ? productRepository.findAllProductsByVendorId(vendorId)
+                : Collections.emptyList());
+        model.addAttribute("req", req);
+        model.addAttribute("isEdit", isEdit);
+    }
+
+    private boolean validateAndProcess(RestockDto req, BindingResult binding) {
+        if (req.getVendorId() == null)
+            binding.rejectValue("vendorId", "NotNull", "Vendor required");
+        if (req.getProductId() == null)
+            binding.rejectValue("productId", "NotNull", "Product required");
+        if (!binding.hasErrors()) {
+            boolean linked = vendorRepository.existsByVendorIdAndProducts_ProductId(
+                    req.getVendorId(), req.getProductId()
+            );
+            if (!linked)
+                binding.rejectValue("productId", "Mismatch", "Product not supplied by this vendor");
+        }
+        return binding.hasErrors();
+    }
+}
+
