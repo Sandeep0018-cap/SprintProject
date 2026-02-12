@@ -1,0 +1,158 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Orders')}"></head>
+
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+
+<style>
+    /* Page Header */
+    .page-header {
+        background: white;
+        padding: 20px 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title {
+        font-weight: 700;
+        font-size: 24px;
+        color: #1b1f27;
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+
+    /* Filter selector */
+    .filter-select {
+        border-radius: 12px;
+        padding: 6px 12px;
+        border: 1px solid #d0d7e2;
+        background: #f8faff;
+        font-weight: 500;
+        color: #1b1f27;
+        box-shadow: inset 0 1px 4px rgba(0,0,0,0.05);
+        transition: 0.15s;
+    }
+    .filter-select:hover {
+        border-color: #007bff;
+    }
+
+    /* Card Wrapper */
+    .orders-card {
+        border: none;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+    }
+
+    /* Table */
+    .table thead {
+        background: #eef4ff;
+        font-weight: 600;
+        color: #0056b3;
+        border-bottom: 2px solid #d6e4ff;
+    }
+
+    .table-hover tbody tr:hover {
+        background: #f3f7ff;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white !important;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+    .status-pending { background: #f0ad4e; }
+    .status-intransit { background: #007bff; }
+    .status-delivered { background: #28a745; }
+    .status-cancelled { background: #dc3545; }
+</style>
+
+<div class="container py-4">
+
+    <!-- HEADER SECTION -->
+    <div class="page-header">
+        <div class="page-title">
+            <i class="bi bi-box-arrow-in-right text-primary fs-4"></i>
+            Orders
+        </div>
+
+        <form th:action="@{/orders}" method="get">
+            <label class="text-muted small me-2 fw-semibold">Filter:</label>
+
+            <select name="status" class="filter-select" onchange="this.form.submit()">
+
+                <!-- SINGLE, ENUM-SAFE ALL OPTION -->
+                <option value="ALL"
+                        th:selected="${selectedStatus == null or selectedStatus == 'ALL'}">
+                    ALL
+                </option>
+
+                <!-- Other statuses (skip ALL to avoid duplicates) -->
+                <option th:each="s : ${statuses}"
+                        th:if="${s != 'ALL'}"
+                        th:value="${s}"
+                        th:text="${s}"
+                        th:selected="${s == selectedStatus}">
+                </option>
+
+            </select>
+        </form>
+    </div>
+
+    <!-- ORDERS TABLE -->
+    <div class="orders-card card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Reference</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="o : ${orders}">
+                    <td class="text-muted" th:text="${o.orderId}">1</td>
+
+                    <td class="fw-semibold" th:text="${o.reference}">ORD-0001</td>
+
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${
+                                    o.status.name()=='PENDING'   ? ' status-pending'   :
+                                    (o.status.name()=='INTRANSIT' ? ' status-intransit' :
+                                    (o.status.name()=='DELIVERED' ? ' status-delivered' : ' status-cancelled'))
+                              }"
+                              th:text="${o.status}">
+                        </span>
+                    </td>
+
+                    <td th:text="${o.createdAt != null ? #temporals.format(o.createdAt, 'dd MMM yyyy HH:mm') : '-'}">
+                        -
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(orders)}">
+                    <td colspan="4" class="text-center text-muted py-4">No orders found</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
