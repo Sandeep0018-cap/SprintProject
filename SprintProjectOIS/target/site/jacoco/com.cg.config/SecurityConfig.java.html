@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.config</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package com.cg.config; // Defines the package for security configuration
+
+import org.springframework.context.annotation.Bean; // Import for defining Spring Beans
+import org.springframework.context.annotation.Configuration; // Marks class as a configuration source
+import org.springframework.security.config.Customizer; // Utility for default security configurations
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // Enables method-level security annotations
+import org.springframework.security.config.annotation.web.builders.HttpSecurity; // Configures web-based security filters
+import org.springframework.security.core.userdetails.User; // Represents a Spring Security user entity
+import org.springframework.security.core.userdetails.UserDetailsService; // Interface to retrieve user-specific data
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // BCrypt implementation for hashing
+import org.springframework.security.crypto.password.PasswordEncoder; // Interface for password encoding logic
+import org.springframework.security.provisioning.InMemoryUserDetailsManager; // Manager for in-memory user storage
+import org.springframework.security.web.SecurityFilterChain; // Defines the matching filter chain for requests
+
+@Configuration // Marks this class as a Spring configuration component
+@EnableMethodSecurity // Activates @PreAuthorize and @Secured annotations
+<span class="fc" id="L17">public class SecurityConfig { // Main security configuration class</span>
+
+    @Bean // Registers the security filter chain as a Spring Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+<span class="fc" id="L21">        return http // Returns the built configuration</span>
+<span class="fc" id="L22">            .authorizeHttpRequests(auth -&gt; auth // Defines URL-based authorization rules</span>
+<span class="fc" id="L23">                .antMatchers(&quot;/login&quot;, &quot;/css/**&quot;, &quot;/js/**&quot;).permitAll() // Allows public access to login and static files</span>
+<span class="fc" id="L24">                .antMatchers(&quot;/staff/**&quot;).hasRole(&quot;STAFF&quot;) // Restricts /staff path to STAFF role</span>
+<span class="fc" id="L25">                .antMatchers(&quot;/admin/**&quot;).hasRole(&quot;ADMIN&quot;) // Restricts /admin path to ADMIN role</span>
+<span class="fc" id="L26">                .anyRequest().authenticated() // Requires authentication for all other requests</span>
+            )
+<span class="fc" id="L28">            .formLogin(form -&gt; form // Configures standard form-based login</span>
+<span class="fc" id="L29">                .loginPage(&quot;/login&quot;).permitAll() // Sets the custom login page path</span>
+<span class="fc" id="L30">                .defaultSuccessUrl(&quot;/dashboard&quot;, true) // Forces redirect to dashboard after login</span>
+            )
+<span class="fc" id="L32">            .logout(logout -&gt; logout // Configures the logout process</span>
+<span class="fc" id="L33">                .logoutUrl(&quot;/logout&quot;) // Sets the logout trigger URL</span>
+<span class="fc" id="L34">                .logoutSuccessUrl(&quot;/login?logout&quot;) // Redirects to login with a logout parameter</span>
+            )
+<span class="fc" id="L36">            .csrf(Customizer.withDefaults()) // Enables default CSRF protection</span>
+<span class="fc" id="L37">            .build(); // Finalizes the HttpSecurity configuration</span>
+    }
+
+    @Bean // Registers the service that manages user credentials
+    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
+        // Creates and stores users in memory for authentication
+<span class="fc" id="L43">        return new InMemoryUserDetailsManager(</span>
+<span class="fc" id="L44">            User.withUsername(&quot;admin&quot;) // Defines admin username</span>
+<span class="fc" id="L45">                .password(encoder.encode(&quot;admin123&quot;)) // Encodes the admin password</span>
+<span class="fc" id="L46">                .roles(&quot;ADMIN&quot;).build(), // Assigns ADMIN role</span>
+<span class="fc" id="L47">            User.withUsername(&quot;staff&quot;) // Defines staff username</span>
+<span class="fc" id="L48">                .password(encoder.encode(&quot;staff123&quot;)) // Encodes the staff password</span>
+<span class="fc" id="L49">                .roles(&quot;STAFF&quot;).build() // Assigns STAFF role</span>
+        );
+    }
+
+    @Bean // Registers the hashing algorithm for the application
+    public PasswordEncoder passwordEncoder() {
+<span class="fc" id="L55">        return new BCryptPasswordEncoder(); // Uses BCrypt for secure one-way hashing</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

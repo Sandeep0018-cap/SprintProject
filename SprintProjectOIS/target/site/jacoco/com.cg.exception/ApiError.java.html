@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiError.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.exception</a> &gt; <span class="el_source">ApiError.java</span></div><h1>ApiError.java</h1><pre class="source lang-java linenums">package com.cg.exception; // Defines the package for custom exception handling components
+
+import java.time.LocalDateTime;
+
+public class ApiError { // Standardized structure for delivering error details via REST or Web layers
+
+<span class="fc" id="L7">    private LocalDateTime timestamp = LocalDateTime.now(); // Automatically records the moment the error occurred</span>
+    private int status; // Stores the HTTP response status code (e.g., 404, 500)
+    private String error; // Stores the short-form error category or HTTP status name
+    private String message; // Provides a human-readable description of what went wrong
+    private String path; // Captures the specific URL endpoint where the failure happened
+
+<span class="fc" id="L13">    public ApiError(int status, String error, String message, String path) { // Constructor for generating immediate error payloads</span>
+<span class="fc" id="L14">        this.status = status;</span>
+<span class="fc" id="L15">        this.error = error;</span>
+<span class="fc" id="L16">        this.message = message;</span>
+<span class="fc" id="L17">        this.path = path;</span>
+<span class="fc" id="L18">    }</span>
+
+<span class="fc" id="L20">    public LocalDateTime getTimestamp() { return timestamp; }</span>
+
+<span class="fc" id="L22">    public int getStatus() { return status; }</span>
+
+<span class="fc" id="L24">    public String getError() { return error; }</span>
+
+<span class="fc" id="L26">    public String getMessage() { return message; }</span>
+
+<span class="fc" id="L28">    public String getPath() { return path; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

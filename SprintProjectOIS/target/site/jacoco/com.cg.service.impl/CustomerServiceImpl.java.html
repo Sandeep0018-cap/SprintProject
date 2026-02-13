@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.service.impl</a> &gt; <span class="el_source">CustomerServiceImpl.java</span></div><h1>CustomerServiceImpl.java</h1><pre class="source lang-java linenums">package com.cg.service.impl;
+
+import com.cg.dto.CustomerRowDto;
+import com.cg.entity.Customer;
+import com.cg.repository.CustomerRepository;
+import com.cg.repository.PurchaseRepository;
+import com.cg.repository.PurchaseItemRepository;
+import com.cg.service.ICustomerService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+
+@Service // Implementation of customer-related business logic and reporting
+public class CustomerServiceImpl implements ICustomerService {
+
+    private final CustomerRepository customerRepository;
+    private final PurchaseRepository purchaseRepository; // Reference for potential purchase-related validations
+    private final PurchaseItemRepository purchaseItemRepository; // Reference for potential item-level analytics
+
+    public CustomerServiceImpl(CustomerRepository customerRepository,
+                               PurchaseRepository purchaseRepository,
+<span class="fc" id="L22">                               PurchaseItemRepository purchaseItemRepository) {</span>
+<span class="fc" id="L23">        this.customerRepository = customerRepository;</span>
+<span class="fc" id="L24">        this.purchaseRepository = purchaseRepository;</span>
+<span class="fc" id="L25">        this.purchaseItemRepository = purchaseItemRepository;</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    @Transactional // Ensures the customer record is fully persisted within a transaction boundary
+    public Customer create(Customer c) {
+<span class="fc" id="L31">        return customerRepository.save(c); // Saves the validated customer entity to the database</span>
+    }
+
+    @Override
+    public List&lt;CustomerRowDto&gt; listCustomersWithLastPurchase() {
+        // Delegates to the repository for a high-performance JPQL projection of purchase history
+<span class="fc" id="L37">        return customerRepository.listCustomersWithLastPurchase();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

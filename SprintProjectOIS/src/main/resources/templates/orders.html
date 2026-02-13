@@ -1,0 +1,91 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Fragment-based head loading the premium 3D CSS and Google Fonts -->
+<head th:replace="~{fragments :: head('Orders')}"></head>
+
+<body class="main-wrapper">
+	<!-- main-wrapper class triggers the 3D entry animation -->
+	<div th:replace="~{fragments :: nav}"></div>
+
+	<div class="container py-4">
+
+		<!-- Header Section: Floating Neumorphic container for title and filters -->
+		<div class="card shadow-soft border-0 mb-4">
+			<div
+				class="card-body d-flex justify-content-between align-items-center py-3">
+				<h1 class="h4 fw-bold m-0 d-flex align-items-center gap-2">
+					<i class="bi bi-receipt text-primary"></i> Orders History
+				</h1>
+
+				<!-- Dynamic Filter: Triggers GET request on selection change -->
+				<form th:action="@{/orders}" method="get"
+					class="d-flex align-items-center gap-2">
+					<label class="text-muted small fw-bold text-uppercase">Filter
+						Status:</label> <select name="status"
+						class="form-select form-select-sm shadow-inner w-auto"
+						onchange="this.form.submit()">
+						<!-- Default state representing the full dataset -->
+						<option value="ALL" th:selected="${selectedStatus == 'ALL'}">ALL
+							ORDERS</option>
+
+						<!-- Iterates through OrderStatus Enum values provided by the controller -->
+						<option th:each="s : ${statuses}" th:if="${s != 'ALL'}"
+							th:value="${s}" th:text="${s}"
+							th:selected="${s == selectedStatus}"></option>
+					</select>
+				</form>
+			</div>
+		</div>
+
+		<!-- Main Data Table: Uses Neumorphic row highlights and status badges -->
+		<div class="card shadow-soft border-0 overflow-hidden">
+			<div class="table-responsive">
+				<table class="table table-hover align-middle mb-0">
+					<thead>
+						<tr>
+							<th class="ps-4">ID</th>
+							<th>Transaction Reference</th>
+							<th>Current Status</th>
+							<th class="pe-4">Date Created</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<!-- Renders individual order rows from the filtered list -->
+						<tr th:each="o : ${orders}">
+							<td class="ps-4 text-muted small" th:text="${o.orderId}">1</td>
+
+							<td class="fw-bold text-dark" th:text="${o.reference}">ORD-2026-0001</td>
+
+							<td>
+								<!-- Dynamic Status Badge: Logic maps Enum names to custom CSS status classes -->
+								<span class="status-badge"
+								th:classappend="${
+                                    o.status.name() == 'PENDING'   ? 'status-pending'   :
+                                    (o.status.name() == 'INTRANSIT' ? 'status-intransit' :
+                                    (o.status.name() == 'DELIVERED' ? 'status-delivered' : 'status-cancelled'))
+                              }"
+								th:text="${o.status}"> </span>
+							</td>
+
+							<!-- Formats Java LocalDateTime into a human-readable string -->
+							<td class="pe-4 text-muted"
+								th:text="${o.createdAt != null ? #temporals.format(o.createdAt, 'dd MMM yyyy HH:mm') : '-'}">
+								01 Jan 2026 10:00</td>
+						</tr>
+
+						<!-- Conditional Row: Displayed only if search/filter yields zero results -->
+						<tr th:if="${#lists.isEmpty(orders)}">
+							<td colspan="4" class="text-center text-muted py-5"><i
+								class="bi bi-search fs-2 d-block mb-2 opacity-25"></i> No
+								matching orders found.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+	</div>
+
+</body>
+</html>

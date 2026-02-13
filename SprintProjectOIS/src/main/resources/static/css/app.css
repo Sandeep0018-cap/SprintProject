@@ -1,0 +1,637 @@
+/* ============================================================
+   SUPER 3D NEUMORPHIC + GLASSMORPHIC APP UI (ZEPTOLIKE)
+   ============================================================ */
+
+:root {
+    /* Brand & Accent Colors */
+    --primary: #0066ff;       /* Main interactive color */
+    --primary-light: #4d8dff; /* Hover/Gradient accent */
+    --primary-dark: #0044cc;  /* Deep contrast for text/borders */
+
+    /* Surface & Backdrop System */
+    --bg: #f4f7fc;            /* Soft neutral background */
+    --card: #ffffff;          /* solid surface color */
+    --glass: rgba(255, 255, 255, 0.65); /* Translucent overlay */
+
+    /* Typography Palette */
+    --text: #1c1f2b;          /* Primary high-contrast text */
+    --text-muted: #6b7280;    /* Secondary/Meta text */
+
+    /* Multi-layered Depth System */
+    --shadow-soft: 0 6px 18px rgba(0,0,0,0.06);   /* Standard elevation */
+    --shadow-3d: 0 12px 30px rgba(0,0,0,0.10);     /* Active lift effect */
+    --shadow-strong: 0 15px 35px rgba(0,0,0,0.15); /* Hover/Modal intensity */
+
+    --radius: 16px;           /* Global consistent rounding */
+}
+
+/* ============================================================
+   BODY & ENVIRONMENT
+   ============================================================ */
+
+body {
+    background: var(--bg);
+    font-family: "Inter", sans-serif;
+    color: var(--text);
+    padding-bottom: 40px;
+    perspective: 1200px;      /* Required for 3D depth animations */
+}
+
+/* ============================================================
+   NAVBAR – Floating Glassmorphic
+   ============================================================ */
+
+.navbar {
+    background: var(--glass) !important;       /* Translucent base */
+    backdrop-filter: blur(14px) saturate(170%); /* Modern frost effect */
+    border-radius: var(--radius);
+    margin: 16px auto;
+    width: calc(100% - 40px);
+    padding: 14px 22px !important;
+    box-shadow: var(--shadow-3d);               /* High elevation */
+    border: 1px solid rgba(255,255,255,0.55);  /* Glass highlight edge */
+}
+
+.navbar-brand {
+    font-weight: 800;                           /* Extra bold branding */
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    color: var(--primary) !important;
+}
+
+.nav-link {
+    font-weight: 600;
+    color: var(--text-muted) !important;
+    transition: 0.2s ease-in-out;               /* Smooth state change */
+}
+
+.nav-link:hover {
+    color: var(--primary) !important;
+    transform: translateY(-2px);                /* Micro-lift on hover */
+}
+
+/* ============================================================
+   BUTTONS – 3D Elastic Interaction
+   ============================================================ */
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)); /* Depth gradient */
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    font-weight: 600;
+    transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Snappy feel */
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px) scale(1.02);    /* Lift and enlarge */
+    box-shadow: var(--shadow-strong);
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+}
+
+.btn-primary:active {
+    transform: translateY(1px);                 /* Physical press effect */
+}
+
+/* ============================================================
+   CARDS – Floating 3D Depth
+   ============================================================ */
+
+.card {
+    border-radius: var(--radius);
+    border: none;
+    background: var(--card);
+    box-shadow: var(--shadow-soft);
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Elastic motion */
+    transform-style: preserve-3d;               /* Enables internal 3D depth */
+}
+
+.card:hover {
+    transform: translateY(-10px) rotateX(2deg); /* Interactive 3D tilt */
+    box-shadow: var(--shadow-strong);
+}
+
+/* ============================================================
+   TABLES – Modern App Structure
+   ============================================================ */
+
+.table {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;                           /* Clips rows to rounded corners */
+}
+
+.table thead {
+    background: #eef3ff;                        /* Soft primary tint */
+    color: var(--primary-dark);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    font-size: 14px;
+    border-bottom: 2px solid #d8e3ff;
+}
+
+.table-hover tbody tr:hover {
+    background: #f4f8ff;                        /* Subtle highlight on row focus */
+    cursor: pointer;
+}
+
+/* ============================================================
+   BADGES & STATUSES
+   ============================================================ */
+
+.badge-soft {
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--glass);
+    backdrop-filter: blur(10px);                /* Glassy pill style */
+    border: 1px solid rgba(0,0,0,0.05);
+    color: var(--primary-dark);
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.07); /* Inner Neumorphic depth */
+}
+
+.status-badge {
+    padding: 6px 16px;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.3px;
+    box-shadow: var(--shadow-soft);
+}
+
+.status-pending { background: #f4a100; }        /* Alerting orange */
+.status-intransit { background: #007bff; }      /* Actionable blue */
+.status-delivered { background: #28c76f; }      /* Success green */
+.status-cancelled { background: #ff3b30; }      /* Error red */
+
+/* ============================================================
+   FORM INPUTS – Soft Inset Depth
+   ============================================================ */
+
+.form-control, .form-select {
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    border: 1px solid #dfe6f1;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04); /* Soft inner shadow */
+    background: white;
+    transition: 0.25s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.12); /* Modern focus ring */
+}
+
+/* ============================================================
+   DASHBOARD TILES – Shimmer Effect
+   ============================================================ */
+
+.tile {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow-soft);
+    min-height: 130px;
+    transition: 0.4s ease;
+    overflow: hidden;                           /* Contains shimmer animation */
+}
+
+.tile:hover {
+    transform: translateY(-8px) translateZ(10px); /* 3D pop-out */
+    box-shadow: var(--shadow-3d);
+}
+
+.tile-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.tile-value {
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-top: 10px;
+    text-shadow: 0 2px 4px rgba(0, 102, 255, 0.1); /* Subtle value glow */
+}
+
+/* ============================================================
+   AVATAR – Neumorphic Pushing
+   ============================================================ */
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #e8eeff, #cbd9ff); /* Concave look */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--primary-dark);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid #d6e2ff;
+}
+
+/* ============================================================
+
+   SUPER 3D NEUMORPHIC + GLASSMORPHIC APP UI (FIXED VERSION)
+
+   ============================================================ */
+ 
+:root {
+
+    --primary: #0066ff;
+
+    --primary-light: #4d8dff;
+
+    --primary-dark: #0044cc;
+ 
+    --bg: #f4f7fc;
+
+    --card: #ffffff;
+
+    --glass: rgba(255, 255, 255, 0.65);
+ 
+    --text: #1c1f2b;
+
+    --text-muted: #6b7280;
+ 
+    --shadow-soft: 0 6px 18px rgba(0,0,0,0.06);
+
+    --shadow-3d: 0 12px 30px rgba(0,0,0,0.10);
+
+    --shadow-strong: 0 15px 35px rgba(0,0,0,0.15);
+ 
+    --radius: 16px;
+
+}
+ 
+/* ============================================================
+
+   BODY – FIXED (REMOVED GLOBAL 3D PERSPECTIVE)
+
+   ============================================================ */
+ 
+body {
+
+    background: var(--bg);
+
+    font-family: "Inter", sans-serif;
+
+    color: var(--text);
+
+    padding-bottom: 40px;
+ 
+    /* ❌ Removed: This was breaking click hit-detection */
+
+    /* perspective: 1200px; */
+
+}
+ 
+/* ============================================================
+
+   NAVBAR – Floating Glassmorphic
+
+   ============================================================ */
+ 
+.navbar {
+
+    background: var(--glass) !important;
+
+    backdrop-filter: blur(14px) saturate(170%);
+
+    border-radius: var(--radius);
+
+    margin: 16px auto;
+
+    width: calc(100% - 40px);
+
+    padding: 14px 22px !important;
+
+    box-shadow: var(--shadow-3d);
+
+    border: 1px solid rgba(255,255,255,0.55);
+
+    position: relative;
+
+    z-index: 5;
+
+}
+ 
+.navbar::before,
+
+.navbar::after {
+
+    pointer-events: none;
+
+}
+ 
+.navbar-brand {
+
+    font-weight: 800;
+
+    font-size: 24px;
+
+    letter-spacing: -0.5px;
+
+    color: var(--primary) !important;
+
+}
+ 
+.nav-link {
+
+    font-weight: 600;
+
+    color: var(--text-muted) !important;
+
+    transition: 0.2s ease-in-out;
+
+}
+ 
+.nav-link:hover {
+
+    color: var(--primary) !important;
+
+    transform: translateY(-2px);
+
+}
+ 
+/* ============================================================
+
+   BUTTONS – FIXED CLICKABILITY
+
+   ============================================================ */
+ 
+.btn-primary {
+
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+
+    border: none;
+
+    padding: 10px 18px;
+
+    border-radius: var(--radius);
+
+    box-shadow: var(--shadow-soft);
+
+    font-weight: 600;
+
+    transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ 
+    /* FIX: ensure button is on its own click layer */
+
+    position: relative;
+
+    z-index: 20;
+
+    display: inline-block;
+
+    transform: translateZ(0);
+
+    will-change: transform, box-shadow, background;
+
+}
+ 
+.btn-primary:hover {
+
+    transform: translateY(-2px) scale(1.01);
+
+    box-shadow: var(--shadow-strong);
+
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+
+}
+ 
+.btn-primary:active {
+
+    transform: translateY(1px);
+
+}
+ 
+/* ============================================================
+
+   CARDS – FIXED 3D (ROTATE REMOVED)
+
+   ============================================================ */
+ 
+.card {
+
+    border-radius: var(--radius);
+
+    border: none;
+
+    background: var(--card);
+
+    box-shadow: var(--shadow-soft);
+
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+ 
+    /* FIXED: Remove 3D depth that breaks click hitbox */
+
+    transform-style: flat;
+
+    position: relative;
+
+    z-index: 1;
+
+}
+ 
+.card::before,
+
+.card::after {
+
+    pointer-events: none;
+
+}
+ 
+.card:hover {
+
+    transform: translateY(-8px);
+
+    box-shadow: var(--shadow-strong);
+
+}
+ 
+/* ============================================================
+
+   TABLES
+
+   ============================================================ */
+ 
+.table {
+
+    background: white;
+
+    border-radius: var(--radius);
+ 
+    /* FIX: overflow hidden + transform caused blocking */
+
+    overflow: clip;
+
+}
+ 
+.table thead {
+
+    background: #eef3ff;
+
+    color: var(--primary-dark);
+
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+
+    font-size: 14px;
+
+    border-bottom: 2px solid #d8e3ff;
+
+}
+ 
+.table-hover tbody tr:hover {
+
+    background: #f4f8ff;
+
+    cursor: pointer;
+
+}
+ 
+/* ============================================================
+
+   BADGES
+
+   ============================================================ */
+ 
+.badge-soft {
+
+    border-radius: 20px;
+
+    padding: 6px 14px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    background: var(--glass);
+
+    backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(0,0,0,0.05);
+
+    color: var(--primary-dark);
+
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.07);
+
+}
+ 
+.status-badge {
+
+    padding: 6px 16px;
+
+    border-radius: 18px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    color: white;
+
+    letter-spacing: 0.3px;
+
+    box-shadow: var(--shadow-soft);
+
+}
+ 
+.status-pending { background: #f4a100; }
+
+.status-intransit { background: #007bff; }
+
+.status-delivered { background: #28c76f; }
+
+.status-cancelled { background: #ff3b30; }
+ 
+/* ============================================================
+
+   FORM INPUTS
+
+   ============================================================ */
+ 
+.form-control, .form-select {
+
+    border-radius: var(--radius);
+
+    padding: 10px 14px;
+
+    border: 1px solid #dfe6f1;
+
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+
+    background: white;
+
+    transition: 0.25s ease-in-out;
+
+}
+ 
+.form-control:focus {
+
+    border-color: var(--primary);
+
+    box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.12);
+
+}
+ 
+/* ============================================================
+
+   DASHBOARD TILES – FIXED
+
+   ============================================================ */
+ 
+.tile {
+
+    background: var(--card);
+
+    border-radius: var(--radius);
+
+    padding: 24px;
+
+    box-shadow: var(--shadow-soft);
+
+    min-height: 130px;
+
+    transition: 0.4s ease;
+ 
+    /* FIX: Remove dangerous 3D depth */
+
+    transform-style: flat;
+
+    position: relative;
+
+    z-index: 1;
+
+}
+ 
+.tile::before,
+
+.tile::after {
+
+    pointer-events: none;
+
+}
+ 
+.tile:hover {
+
+    transform: translateY(-6px);
+
+    box-shadow: var(--shadow-3d);
+
+}
+ 
+.tile-title {
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+ 

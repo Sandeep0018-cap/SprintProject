@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RestockDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.dto</a> &gt; <span class="el_source">RestockDto.java</span></div><h1>RestockDto.java</h1><pre class="source lang-java linenums">package com.cg.dto;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+<span class="fc" id="L6">public class RestockDto {</span>
+    private Long id;
+
+    @NotNull(message = &quot;Vendor required&quot;)
+    private Long vendorId;
+
+    @NotNull(message = &quot;Product required&quot;)
+    private Long productId;
+
+    @Min(value = 1, message = &quot;Requested quantity must be at least 1&quot;)
+    private Integer requestedQty;
+
+	public Long getId() {
+<span class="nc" id="L19">		return id;</span>
+	}
+
+	public void setId(Long id) {
+<span class="fc" id="L23">		this.id = id;</span>
+<span class="fc" id="L24">	}</span>
+
+	public Long getVendorId() {
+<span class="fc" id="L27">		return vendorId;</span>
+	}
+
+	public void setVendorId(Long vendorId) {
+<span class="fc" id="L31">		this.vendorId = vendorId;</span>
+<span class="fc" id="L32">	}</span>
+
+	public Long getProductId() {
+<span class="fc" id="L35">		return productId;</span>
+	}
+
+	public void setProductId(Long productId) {
+<span class="fc" id="L39">		this.productId = productId;</span>
+<span class="fc" id="L40">	}</span>
+
+	public Integer getRequestedQty() {
+<span class="fc" id="L43">		return requestedQty;</span>
+	}
+
+	public void setRequestedQty(Integer requestedQty) {
+<span class="fc" id="L47">		this.requestedQty = requestedQty;</span>
+<span class="fc" id="L48">	}</span>
+
+    
+    
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

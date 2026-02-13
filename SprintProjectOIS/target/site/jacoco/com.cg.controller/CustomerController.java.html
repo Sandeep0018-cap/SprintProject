@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.controller</a> &gt; <span class="el_source">CustomerController.java</span></div><h1>CustomerController.java</h1><pre class="source lang-java linenums">package com.cg.controller;
+
+import com.cg.entity.Customer;
+import com.cg.service.ICustomerService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import javax.validation.Valid;
+
+@Controller
+@RequestMapping(&quot;/customers&quot;)
+public class CustomerController {
+
+    private final ICustomerService customerService;
+
+<span class="fc" id="L16">    public CustomerController(ICustomerService customerService) {</span>
+<span class="fc" id="L17">        this.customerService = customerService;</span>
+<span class="fc" id="L18">    }</span>
+
+    @GetMapping(&quot;/list&quot;) // Handles navigation to the customer directory view
+    public String list(Model model) {
+        // Aggregates client data along with their most recent transaction date/info
+<span class="fc" id="L23">        var rows = customerService.listCustomersWithLastPurchase();</span>
+<span class="fc" id="L24">        model.addAttribute(&quot;rows&quot;, rows);</span>
+<span class="fc" id="L25">        return &quot;customers&quot;;</span>
+    }
+
+    @PostMapping // Handles the submission of the new customer registration form
+    public String create(@Valid @ModelAttribute Customer customer) {
+        // Triggers validation and persistence of the customer entity
+<span class="fc" id="L31">        customerService.create(customer);</span>
+<span class="fc" id="L32">        return &quot;redirect:/customers/list&quot;; </span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

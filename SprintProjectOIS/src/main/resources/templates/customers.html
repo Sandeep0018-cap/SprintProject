@@ -1,0 +1,92 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Standard head fragment for UI styles and meta-tags -->
+<head th:replace="~{fragments :: head('Customers')}"></head>
+<body class="main-wrapper">
+	<!-- Navbar -->
+	<div th:replace="~{fragments :: nav}"></div>
+
+	<div class="container py-5">
+		<!-- Section Header -->
+		<div class="mb-4">
+			<h1 class="h3 fw-bold section-title">
+				<i class="bi bi-people me-2 text-primary"></i>Customers
+			</h1>
+		</div>
+
+		<!-- Main Customer Data Card -->
+		<div class="card border-0 shadow-soft">
+			<div class="table-responsive">
+				<table class="table table-hover align-middle mb-0">
+					<thead>
+						<tr>
+							<th class="ps-4">ID</th>
+							<th>Customer Name</th>
+							<th>Contact No</th>
+							<th>City</th>
+							<th>Latest Purchase</th>
+							<th>Transaction ID</th>
+							<th class="pe-4">Payment Method</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Iterates through projected DTO list from CustomerService -->
+						<tr th:each="c : ${rows}">
+							<!-- Primary Key identifier -->
+							<td class="ps-4 text-muted small" th:text="${c.customer_id}">101</td>
+
+							<!-- Client display name -->
+							<td class="fw-bold text-dark" th:text="${c.name}">Customer
+								Name</td>
+
+							<!-- Contact telephone info -->
+							<td th:text="${c.phone}">0000000000</td>
+
+							<!-- Geographic location rendered as a soft pill badge -->
+							<td><span class="badge-soft px-3 py-1" th:text="${c.city}">City</span>
+							</td>
+
+							<!-- Concatenates Brand and Product for a complete purchase summary -->
+							<td>
+								<div class="d-flex flex-column">
+									<span class="fw-semibold"
+										th:text="${c.lastPurchasedProductName != null ? c.lastPurchasedProductName : 'No Transactions'}">
+
+										Product </span> <small class="text-muted"
+										th:text="${c.lastPurchasedBrand != null ? c.lastPurchasedBrand : ''}">
+
+										Brand </small>
+								</div>
+							</td>
+
+							<!-- ✅ Transaction ID with null-safety -->
+							<td><span class="font-monospace small"
+								th:text="${c.transactionId != null ? c.transactionId : '—'}">
+
+									UPI-TXN-10001 </span></td>
+
+							<!-- Displays the Enum-based payment method with null-safety -->
+							<td class="pe-4"><span
+								class="small fw-bold text-uppercase opacity-75"
+								th:text="${c.paymentMode != null ? c.paymentMode.name() : 'N/A'}">
+
+									MODE </span></td>
+						</tr>
+
+						<!-- Empty state visual placeholder -->
+						<tr th:if="${rows == null || #lists.isEmpty(rows)}">
+							<!-- 7 columns total after adding Transaction ID -->
+							<td colspan="7" class="text-center py-5 text-muted"><i
+								class="bi bi-database-exclamation fs-1 d-block mb-3 opacity-25"></i>
+
+								No customer records found in the database.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
+

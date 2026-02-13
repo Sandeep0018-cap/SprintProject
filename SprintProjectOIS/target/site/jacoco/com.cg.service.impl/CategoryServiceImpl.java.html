@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.service.impl</a> &gt; <span class="el_source">CategoryServiceImpl.java</span></div><h1>CategoryServiceImpl.java</h1><pre class="source lang-java linenums">package com.cg.service.impl;
+
+import com.cg.dto.CategoryDto;
+import com.cg.entity.Category;
+import com.cg.exception.BadRequestException;
+import com.cg.exception.ResourceNotFoundException;
+import com.cg.repository.CategoryRepository;
+import com.cg.service.ICategoryService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service // Marks this as the business logic implementation for category operations
+public class CategoryServiceImpl implements ICategoryService {
+
+    private final CategoryRepository categoryRepository;
+
+<span class="fc" id="L19">    public CategoryServiceImpl(CategoryRepository categoryRepository) {</span>
+<span class="fc" id="L20">        this.categoryRepository = categoryRepository;</span>
+<span class="fc" id="L21">    }</span>
+
+    @Override
+    public List&lt;CategoryDto&gt; findAll() {
+        // Transforms all persisted entities into data transfer objects for the UI
+<span class="fc" id="L26">        return categoryRepository.findAll().stream()</span>
+<span class="fc" id="L27">                .map(c -&gt; new CategoryDto(c.getCategoryId(), c.getName()))</span>
+<span class="fc" id="L28">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    @Transactional // Ensures atomicity for the creation process
+    public CategoryDto create(String name) {
+        // Enforces uniqueness by checking for existing names regardless of case
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (categoryRepository.findByNameIgnoreCase(name).isPresent()) {</span>
+<span class="fc" id="L36">            throw new BadRequestException(&quot;Category already exists: &quot; + name);</span>
+        }
+<span class="fc" id="L38">        Category c = new Category();</span>
+<span class="fc" id="L39">        c.setName(name);</span>
+<span class="fc" id="L40">        Category saved = categoryRepository.save(c);</span>
+<span class="fc" id="L41">        return new CategoryDto(saved.getCategoryId(), saved.getName());</span>
+    }
+
+    @Override
+    @Transactional // Guarantees the delete operation is finalized in the database
+    public void delete(Long id) {
+        // Validates existence before attempting removal to prevent silent failures
+<span class="fc" id="L48">        Category c = categoryRepository.findById(id)</span>
+<span class="fc" id="L49">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Category not found: &quot; + id));</span>
+<span class="fc" id="L50">        categoryRepository.delete(c);</span>
+<span class="fc" id="L51">    }</span>
+
+    @Override
+    public CategoryDto findById(Long id) {
+        // Retrieves a specific classification and converts it to a DTO for viewing
+<span class="nc" id="L56">        Category c = categoryRepository.findById(id)</span>
+<span class="nc" id="L57">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Category not found&quot;));</span>
+<span class="nc" id="L58">        return new CategoryDto(c.getCategoryId(), c.getName());</span>
+    }
+
+    @Override
+    @Transactional // Synchronizes state changes to the database within a transaction
+    public CategoryDto update(Long id, String name) {
+<span class="nc" id="L64">        Category c = categoryRepository.findById(id)</span>
+<span class="nc" id="L65">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Category not found&quot;));</span>
+
+<span class="nc" id="L67">        c.setName(name); // Updates the entity state in the persistence context</span>
+<span class="nc" id="L68">        categoryRepository.save(c);</span>
+
+<span class="nc" id="L70">        return new CategoryDto(c.getCategoryId(), c.getName());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

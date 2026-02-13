@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DashboardController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.controller</a> &gt; <span class="el_source">DashboardController.java</span></div><h1>DashboardController.java</h1><pre class="source lang-java linenums">package com.cg.controller;
+
+import com.cg.dto.ProductStockAlertDto;
+import com.cg.entity.*;
+import com.cg.enums.OrderStatus;
+import com.cg.enums.PaymentMode;
+import com.cg.repository.*;
+import com.cg.service.IProductService;
+import com.cg.service.IPurchaseService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import javax.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.TextStyle;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Controller
+public class DashboardController {
+
+    private final IPurchaseService purchaseService;
+    private final IProductService productService;
+    private final PurchaseItemRepository purchaseItemRepository;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final RestockRequestRepository restockRequestRepository;
+
+    public DashboardController(IPurchaseService purchaseService,
+                               IProductService productService,
+                               PurchaseItemRepository purchaseItemRepository,
+                               ProductRepository productRepository,
+                               OrderRepository orderRepository,
+<span class="fc" id="L37">                               RestockRequestRepository restockRequestRepository) {</span>
+<span class="fc" id="L38">        this.purchaseService = purchaseService;</span>
+<span class="fc" id="L39">        this.productService = productService;</span>
+<span class="fc" id="L40">        this.purchaseItemRepository = purchaseItemRepository;</span>
+<span class="fc" id="L41">        this.productRepository = productRepository;</span>
+<span class="fc" id="L42">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L43">        this.restockRequestRepository = restockRequestRepository;</span>
+<span class="fc" id="L44">    }</span>
+
+    @GetMapping(&quot;/dashboard&quot;) // Orchestrates data for the primary analytical landing page
+    public String dashboard(Model model, Authentication auth, HttpSession session) {
+<span class="fc" id="L48">        boolean isAdmin = hasRole(auth, &quot;ROLE_ADMIN&quot;); // Checks for administrative privileges</span>
+<span class="fc" id="L49">        boolean isStaff = hasRole(auth, &quot;ROLE_STAFF&quot;); // Checks for staff-level access</span>
+
+        // Manages a one-time welcome message state per user session
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (session.getAttribute(&quot;WELCOME_SHOWN&quot;) == null) {</span>
+<span class="fc" id="L53">            session.setAttribute(&quot;WELCOME_SHOWN&quot;, Boolean.TRUE);</span>
+<span class="fc" id="L54">            model.addAttribute(&quot;showWelcome&quot;, true);</span>
+<span class="fc bfc" id="L55" title="All 4 branches covered.">            model.addAttribute(&quot;welcomeRole&quot;, isAdmin ? &quot;Welcome Admin&quot; : (isStaff ? &quot;Welcome Staff&quot; : &quot;Welcome&quot;));</span>
+        }
+<span class="fc bfc" id="L57" title="All 4 branches covered.">        model.addAttribute(&quot;loginRole&quot;, isAdmin ? &quot;Admin Login&quot; : (isStaff ? &quot;Staff Login&quot; : &quot;User&quot;));</span>
+
+        // Retrieves a list of products falling below the defined threshold
+<span class="fc" id="L60">        List&lt;ProductStockAlertDto&gt; alerts = productService.lowStockSummary(10);</span>
+<span class="fc" id="L61">        model.addAttribute(&quot;lowStockAlerts&quot;, alerts);</span>
+<span class="fc" id="L62">        model.addAttribute(&quot;lowStockCount&quot;, alerts.size());</span>
+
+        // Aggregates counts for every possible order status for charting
+<span class="fc" id="L65">        Map&lt;String, Long&gt; orderStatusCounts = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L66">        Arrays.stream(OrderStatus.values()).forEach(s -&gt; orderStatusCounts.put(s.name(), 0L));</span>
+<span class="fc" id="L67">        orderRepository.findAll().forEach(o -&gt;</span>
+<span class="nc" id="L68">                orderStatusCounts.computeIfPresent(o.getStatus().name(), (k, v) -&gt; v + 1));</span>
+<span class="fc" id="L69">        model.addAttribute(&quot;orderStatusLabels&quot;, new ArrayList&lt;&gt;(orderStatusCounts.keySet()));</span>
+<span class="fc" id="L70">        model.addAttribute(&quot;orderStatusValues&quot;, new ArrayList&lt;&gt;(orderStatusCounts.values()));</span>
+
+        // Initializes a 12-month rolling window for financial reporting
+<span class="fc" id="L73">        YearMonth thisMonth = YearMonth.now();</span>
+<span class="fc" id="L74">        Map&lt;YearMonth, Double&gt; revenueByMonth = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        for (int i = 11; i &gt;= 0; i--) revenueByMonth.put(thisMonth.minusMonths(i), 0.0);</span>
+
+<span class="fc" id="L77">        List&lt;PurchaseItem&gt; allItems = purchaseItemRepository.findAll();</span>
+<span class="fc" id="L78">        allItems.forEach(pi -&gt; {</span>
+<span class="pc bpc" id="L79" title="2 of 4 branches missed.">            if (pi.getPurchase() == null || pi.getPurchase().getCreatedAt() == null) return;</span>
+<span class="fc" id="L80">            YearMonth ym = YearMonth.from(pi.getPurchase().getCreatedAt().toLocalDate());</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if (revenueByMonth.containsKey(ym)) {</span>
+                // Calculates item total with null-safety and updates monthly bucket
+<span class="fc" id="L83">                double add = nz(pi.getUnitPrice()) * nzi(pi.getQuantity());</span>
+<span class="fc" id="L84">                revenueByMonth.put(ym, revenueByMonth.get(ym) + add);</span>
+            }
+<span class="fc" id="L86">        });</span>
+        
+        // Formats month keys into readable labels (e.g., &quot;Jan 2024&quot;)
+<span class="fc" id="L89">        model.addAttribute(&quot;monthsLabels&quot;, revenueByMonth.keySet().stream()</span>
+<span class="fc" id="L90">                .map(ym -&gt; ym.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + &quot; &quot; + ym.getYear())</span>
+<span class="fc" id="L91">                .collect(Collectors.toList()));</span>
+<span class="fc" id="L92">        model.addAttribute(&quot;monthsValues&quot;, new ArrayList&lt;&gt;(revenueByMonth.values()));</span>
+
+        // Calculates total revenue generated per manufacturer brand
+<span class="fc" id="L95">        Map&lt;String, Double&gt; revenueByBrand = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L96">        allItems.forEach(pi -&gt; {</span>
+<span class="pc bpc" id="L97" title="2 of 4 branches missed.">            String brand = (pi.getProduct() != null &amp;&amp; pi.getProduct().getBrand() != null) ? pi.getProduct().getBrand() : &quot;Unknown&quot;;</span>
+<span class="fc" id="L98">            revenueByBrand.merge(brand, nz(pi.getUnitPrice()) * nzi(pi.getQuantity()), Double::sum);</span>
+<span class="fc" id="L99">        });</span>
+        
+        // Sorts brands by revenue descending to highlight top performers
+<span class="fc" id="L102">        Map&lt;String, Double&gt; brandSorted = revenueByBrand.entrySet().stream()</span>
+<span class="fc" id="L103">                .sorted(Map.Entry.&lt;String, Double&gt;comparingByValue().reversed())</span>
+<span class="pc" id="L104">                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -&gt; a, LinkedHashMap::new));</span>
+<span class="fc" id="L105">        model.addAttribute(&quot;brandLabels&quot;, new ArrayList&lt;&gt;(brandSorted.keySet()));</span>
+<span class="fc" id="L106">        model.addAttribute(&quot;brandValues&quot;, new ArrayList&lt;&gt;(brandSorted.values()));</span>
+
+        // Groups sales volume by product ID to determine real-time availability
+<span class="fc" id="L109">        Map&lt;Long, Integer&gt; soldByProduct = allItems.stream()</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">                .filter(pi -&gt; pi.getProduct() != null)</span>
+<span class="fc" id="L111">                .collect(Collectors.groupingBy(pi -&gt; pi.getProduct().getProductId(), Collectors.summingInt(PurchaseItem::getQuantity)));</span>
+        
+<span class="fc" id="L113">        int red = 0, orange = 0, green = 0;</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        for (Product p : productRepository.findAll()) {</span>
+<span class="fc" id="L115">            int available = nzi(p.getStockQty()) - soldByProduct.getOrDefault(p.getProductId(), 0);</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">            if (available &lt;= 4) red++; // Critical stock level</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">            else if (available &lt;= 10) orange++; // Warning stock level</span>
+<span class="fc" id="L118">            else green++; // Healthy stock level</span>
+<span class="fc" id="L119">        }</span>
+<span class="fc" id="L120">        model.addAttribute(&quot;donutLabels&quot;, Arrays.asList(&quot;0–4 (Low)&quot;, &quot;5–10 (Med)&quot;, &quot;≥10 (OK)&quot;));</span>
+<span class="fc" id="L121">        model.addAttribute(&quot;donutValues&quot;, Arrays.asList(red, orange, green));</span>
+
+        // Populates counts for various payment methods (Card, Cash, etc.)
+<span class="fc" id="L124">        Map&lt;String, Long&gt; raw = purchaseService.paymentModeCounts();</span>
+<span class="fc" id="L125">        Map&lt;String, Long&gt; modeCounts = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L126">        Arrays.stream(PaymentMode.values()).forEach(m -&gt; modeCounts.put(m.name(), raw.getOrDefault(m.name(), 0L)));</span>
+<span class="fc" id="L127">        model.addAttribute(&quot;modeCounts&quot;, modeCounts);</span>
+
+        // Filters and sorts restock requests specifically created by the logged-in staff member
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if (isStaff) {</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">            String username = auth != null ? auth.getName() : null;</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            model.addAttribute(&quot;myRestocks&quot;, username == null ? Collections.emptyList() :</span>
+<span class="fc" id="L133">                    restockRequestRepository.findAll().stream()</span>
+<span class="fc" id="L134">                            .filter(r -&gt; username.equals(r.getCreatedByUsername()))</span>
+<span class="fc" id="L135">                            .sorted(Comparator.comparingLong(RestockRequest::getId).reversed())</span>
+<span class="fc" id="L136">                            .collect(Collectors.toList()));</span>
+        }
+
+<span class="fc" id="L139">        return &quot;dashboard&quot;;</span>
+    }
+
+    private boolean hasRole(Authentication auth, String role) { // Validates user permissions against a specific role string
+<span class="pc bpc" id="L143" title="1 of 4 branches missed.">        return auth != null &amp;&amp; auth.getAuthorities().stream().anyMatch(a -&gt; a.getAuthority().equals(role));</span>
+    }
+
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">    private double nz(Double d) { return d == null ? 0.0 : d; } // &quot;Null to Zero&quot; for Double values</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">    private int nzi(Integer i) { return i == null ? 0 : i; }   // &quot;Null to Zero&quot; for Integer values</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.cg.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import javax.servlet.http.HttpServletRequest;
+
+@ControllerAdvice // Intercepts exceptions across all controllers to provide uniform responses
+<span class="fc" id="L12">public class GlobalExceptionHandler {</span>
+
+    @ExceptionHandler(ResourceNotFoundException.class) // Triggers when a requested DB entity does not exist
+    public ResponseEntity&lt;ApiError&gt; handleNotFound(ResourceNotFoundException ex, HttpServletRequest req) {
+<span class="fc" id="L16">        ApiError err = new ApiError(404, &quot;NOT_FOUND&quot;, ex.getMessage(), req.getRequestURI());</span>
+<span class="fc" id="L17">        return new ResponseEntity&lt;&gt;(err, HttpStatus.NOT_FOUND);</span>
+    }
+
+    @ExceptionHandler(BadRequestException.class) // Triggers for semantic errors or invalid business states
+    public ResponseEntity&lt;ApiError&gt; handleBadRequest(BadRequestException ex, HttpServletRequest req) {
+<span class="fc" id="L22">        ApiError err = new ApiError(400, &quot;BAD_REQUEST&quot;, ex.getMessage(), req.getRequestURI());</span>
+<span class="fc" id="L23">        return new ResponseEntity&lt;&gt;(err, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class) // Specifically handles failures from @Valid/@Validated annotations
+    public ResponseEntity&lt;ApiError&gt; handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+        // Extracts the first available validation message or provides a generic fallback
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        String msg = ex.getBindingResult().getAllErrors().isEmpty() ? &quot;Validation failed&quot; </span>
+<span class="nc" id="L30">                     : ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();</span>
+        
+<span class="nc" id="L32">        ApiError err = new ApiError(400, &quot;VALIDATION_ERROR&quot;, msg, req.getRequestURI());</span>
+<span class="nc" id="L33">        return new ResponseEntity&lt;&gt;(err, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(Exception.class) // Catch-all handler for unexpected system failures
+    public String handleUiErrors(Exception ex, Model model) {
+<span class="fc" id="L38">        model.addAttribute(&quot;message&quot;, ex.getMessage()); // Passes the error details to the thymeleaf error page</span>
+<span class="fc" id="L39">        return &quot;error&quot;; // Resolves to the error.html view template</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

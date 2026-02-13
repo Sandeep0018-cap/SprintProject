@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerRowDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.dto</a> &gt; <span class="el_source">CustomerRowDto.java</span></div><h1>CustomerRowDto.java</h1><pre class="source lang-java linenums">package com.cg.dto;
+ 
+import com.cg.enums.PaymentMode;
+ 
+public class CustomerRowDto {
+ 
+    private Long customer_id;                 
+
+    private String name;                      
+
+    private String phone;                     
+
+    private String city;                      
+
+    private String lastPurchasedProductName;  
+
+    private String lastPurchasedBrand;        
+
+    private PaymentMode paymentMode;          
+ 
+    private String transactionId;              // Stores latest transaction ID (e.g. UPI-TXN-10001)
+ 
+<span class="nc" id="L23">    public CustomerRowDto() {}</span>
+ 
+    public CustomerRowDto(Long customer_id,
+
+            String name,
+
+            String phone,
+
+            String city,
+
+            String lastPurchasedProductName,
+
+            String lastPurchasedBrand,
+
+            PaymentMode paymentMode,
+
+<span class="fc" id="L39">            String transactionId) {</span>
+
+<span class="fc" id="L41">this.customer_id = customer_id;</span>
+
+<span class="fc" id="L43">this.name = name;</span>
+
+<span class="fc" id="L45">this.phone = phone;</span>
+
+<span class="fc" id="L47">this.city = city;</span>
+
+<span class="fc" id="L49">this.lastPurchasedProductName = lastPurchasedProductName;</span>
+
+<span class="fc" id="L51">this.lastPurchasedBrand = lastPurchasedBrand;</span>
+
+<span class="fc" id="L53">this.paymentMode = paymentMode;</span>
+
+<span class="fc" id="L55">this.transactionId = transactionId;   </span>
+
+<span class="fc" id="L57">    }</span>
+ 
+<span class="fc" id="L59">    public Long getCustomer_id() { return customer_id; }</span>
+
+<span class="nc" id="L61">    public void setCustomer_id(Long customer_id) { this.customer_id = customer_id; }</span>
+ 
+<span class="fc" id="L63">    public String getName() { return name; }</span>
+
+<span class="nc" id="L65">    public void setName(String name) { this.name = name; }</span>
+ 
+<span class="fc" id="L67">    public String getPhone() { return phone; }</span>
+
+<span class="nc" id="L69">    public void setPhone(String phone) { this.phone = phone; }</span>
+ 
+<span class="fc" id="L71">    public String getCity() { return city; }</span>
+
+<span class="nc" id="L73">    public void setCity(String city) { this.city = city; }</span>
+ 
+<span class="fc" id="L75">    public String getLastPurchasedProductName() { return lastPurchasedProductName; }</span>
+
+<span class="nc" id="L77">    public void setLastPurchasedProductName(String lastPurchasedProductName) { this.lastPurchasedProductName = lastPurchasedProductName; }</span>
+ 
+<span class="fc" id="L79">    public String getLastPurchasedBrand() { return lastPurchasedBrand; }</span>
+
+<span class="nc" id="L81">    public void setLastPurchasedBrand(String lastPurchasedBrand) { this.lastPurchasedBrand = lastPurchasedBrand; }</span>
+ 
+<span class="fc" id="L83">    public PaymentMode getPaymentMode() { return paymentMode; }</span>
+
+<span class="nc" id="L85">    public void setPaymentMode(PaymentMode paymentMode) { this.paymentMode = paymentMode; }</span>
+ 
+
+<span class="fc" id="L88">    public String getTransactionId() { return transactionId; }</span>
+
+<span class="nc" id="L90">    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }</span>
+
+}
+ 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

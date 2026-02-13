@@ -1,0 +1,123 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!-- Head fragment dynamically resolves the title based on the presence of a Product ID -->
+<head
+	th:replace="~{fragments :: head(${product?.productId != null ? 'Edit Product' : 'Add Product'})}"></head>
+
+<body class="main-wrapper">
+	<!-- Activates 2026 premium 3D entrance animation -->
+	<div th:replace="~{fragments :: nav}"></div>
+
+	<div class="container py-4" style="max-width: 860px;">
+
+		<!-- Section Header with Dynamic Labeling -->
+		<h1 class="h4 mb-4 section-title">
+			<i class="bi"
+				th:classappend="${product?.productId != null ? 'bi-pencil-square' : 'bi-plus-circle'}"></i>
+			<span
+				th:text="${product?.productId != null ? 'Modify Product Details' : 'Catalog New Product'}">Form
+				Title</span>
+		</h1>
+
+		<!-- Action Feedback Messages -->
+		<div th:if="${success}"
+			class="alert alert-success shadow-soft border-0" th:text="${success}"></div>
+		<div th:if="${error}" class="alert alert-danger shadow-soft border-0"
+			th:text="${error}"></div>
+
+		<!-- Main Data Entry Card: Styled with Neumorphic depth -->
+		<div class="card shadow-soft border-0">
+			<div class="card-body p-4">
+
+				<!-- Transactional Form: Dynamic action switching between POST (Create) and PUT (Update) -->
+				<form
+					th:action="${product?.productId != null} ? @{'/products/' + ${product.productId}} : @{'/products'}"
+					th:object="${product}" method="post" class="row g-4">
+
+					<!-- HIDDEN FIELDS: Method override for PUT, CSRF security, and ID persistence -->
+					<input type="hidden" name="_method" value="put"
+						th:if="*{productId != null}" /> <input type="hidden"
+						th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> <input
+						type="hidden" th:field="*{productId}" th:if="*{productId != null}" />
+					<input type="hidden" name="categoryId" th:value="${categoryId}" />
+
+					<!-- Field: Stock Keeping Unit (SKU) -->
+					<div class="col-md-6">
+						<label class="form-label fw-bold">SKU Identifier</label> <input
+							type="text" class="form-control" th:field="*{skuId}"
+							placeholder="e.g. SKU-2026-X" required>
+						<div class="invalid-feedback d-block small"
+							th:if="${#fields.hasErrors('skuId')}" th:errors="*{skuId}"></div>
+					</div>
+
+					<!-- Field: Manufacturer / Brand -->
+					<div class="col-md-6">
+						<label class="form-label fw-bold">Brand Name</label> <input
+							type="text" class="form-control" th:field="*{brand}"
+							placeholder="e.g. Aether Dynamics" required>
+						<div class="invalid-feedback d-block small"
+							th:if="${#fields.hasErrors('brand')}" th:errors="*{brand}"></div>
+					</div>
+
+					<!-- Field: Product Display Name -->
+					<div class="col-12">
+						<label class="form-label fw-bold">Product Name</label> <input
+							type="text" class="form-control" th:field="*{name}"
+							placeholder="Enter full descriptive name" required>
+						<div class="invalid-feedback d-block small"
+							th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+					</div>
+
+					<!-- Field: Sales Pricing -->
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Unit Price (₹)</label> <input
+							type="number" class="form-control" th:field="*{price}" min="0"
+							step="0.01" required>
+						<div class="invalid-feedback d-block small"
+							th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+					</div>
+
+					<!-- Field: Initial Inventory Volume -->
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Stock Quantity</label> <input
+							type="number" class="form-control" th:field="*{stockQty}" min="0"
+							step="1" required>
+						<div class="invalid-feedback d-block small"
+							th:if="${#fields.hasErrors('stockQty')}" th:errors="*{stockQty}"></div>
+					</div>
+
+					<!-- Field: Primary Supplier Mapping -->
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Assigned Vendor</label> <select
+							class="form-select" th:field="*{vendorId}" required>
+							<option th:value="${null}">-- Select Vendor --</option>
+							<option th:each="v : ${vendors}" th:value="${v.vendorId}"
+								th:text="${v.name}"></option>
+						</select>
+						<div class="invalid-feedback d-block small"
+							th:if="${#fields.hasErrors('vendorId')}" th:errors="*{vendorId}"></div>
+					</div>
+
+					<!-- Submission and Cancellation Actions -->
+					<div
+						class="col-12 mt-4 d-flex justify-content-between align-items-center">
+						<div class="d-flex gap-2">
+							<button type="submit" class="btn btn-primary px-4 shadow-soft">
+								<i class="bi bi-cloud-arrow-up me-2"></i> <span
+									th:text="${product?.productId != null ? 'Update Item' : 'Register Product'}">Submit</span>
+							</button>
+							<a th:href="@{/categories/{id}(id=${categoryId})}"
+								class="btn btn-outline-secondary px-4"> Cancel </a>
+						</div>
+						<!-- Contextual help hint -->
+						<small class="text-muted italic"><i
+							class="bi bi-info-circle me-1"></i> Changes will reflect in
+							category analytics.</small>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

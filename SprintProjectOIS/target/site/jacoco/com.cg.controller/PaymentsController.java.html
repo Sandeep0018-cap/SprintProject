@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.controller</a> &gt; <span class="el_source">PaymentsController.java</span></div><h1>PaymentsController.java</h1><pre class="source lang-java linenums">package com.cg.controller;
+
+import com.cg.enums.PaymentMode;
+import com.cg.service.IPurchaseService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@Controller
+public class PaymentsController {
+
+    private final IPurchaseService purchaseService;
+
+<span class="fc" id="L17">    public PaymentsController(IPurchaseService purchaseService) {</span>
+<span class="fc" id="L18">        this.purchaseService = purchaseService;</span>
+<span class="fc" id="L19">    }</span>
+
+    @GetMapping(&quot;/payments&quot;) // Entry point for the financial transaction overview
+    public String payments(Model model) {
+        // Retrieves raw transaction counts categorized by their payment identifiers
+<span class="nc" id="L24">        Map&lt;String, Long&gt; raw = purchaseService.paymentModeCounts();</span>
+<span class="nc" id="L25">        Map&lt;String, Long&gt; modeCounts = new LinkedHashMap&lt;&gt;();</span>
+
+        // Synchronizes every defined payment enum with the results to ensure zero-count visibility
+<span class="nc" id="L28">        Arrays.stream(PaymentMode.values()).forEach(m -&gt; </span>
+<span class="nc" id="L29">            modeCounts.put(m.name(), raw.getOrDefault(m.name(), 0L))</span>
+        );
+
+<span class="nc" id="L32">        model.addAttribute(&quot;modeCounts&quot;, modeCounts); // Binds the synchronized map to the UI layer</span>
+<span class="nc" id="L33">        return &quot;payments&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

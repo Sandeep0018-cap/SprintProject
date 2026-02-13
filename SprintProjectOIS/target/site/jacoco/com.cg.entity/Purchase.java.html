@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Purchase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.entity</a> &gt; <span class="el_source">Purchase.java</span></div><h1>Purchase.java</h1><pre class="source lang-java linenums">package com.cg.entity;
+
+import javax.persistence.*;
+import com.cg.enums.PaymentMode;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;purchases&quot;) // Table for recording customer sales transactions
+<span class="fc" id="L9">public class Purchase {</span>
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long purchase_id;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;customer_id&quot;, nullable = false) // Links the sale to a specific customer record
+    private Customer customer;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;product_id&quot;, nullable = false) // Links the sale to the specific inventory item
+    private Product product;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 15) // Stores payment method as readable text
+    private PaymentMode paymentMode;
+
+    private String transactionId; // Optional reference for non-cash payments
+
+<span class="fc" id="L29">    private LocalDateTime createdAt = LocalDateTime.now(); // Automatically timestamps the sale</span>
+
+    private String createdByUsername; // Tracks the staff member who processed the sale
+
+    public String getBrand() { // Transient helper: retrieves brand from the associated product
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        return (product != null) ? product.getBrand() : &quot;N/A&quot;;</span>
+    }
+
+    public String getProductName() { // Transient helper: retrieves product name from the association
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        return (product != null) ? product.getName() : &quot;N/A&quot;;</span>
+    }
+
+<span class="nc" id="L41">    public Long getId() { return purchase_id; } // Alias getter for consistency with generic repositories</span>
+
+<span class="nc" id="L43">    public Long getPurchase_id() { return purchase_id; }</span>
+    
+<span class="nc" id="L45">    public void setPurchase_id(Long purchase_id) { this.purchase_id = purchase_id; }</span>
+    
+<span class="nc" id="L47">    public Customer getCustomer() { return customer; }</span>
+    
+<span class="fc" id="L49">    public void setCustomer(Customer customer) { this.customer = customer; }</span>
+    
+<span class="nc" id="L51">    public Product getProduct() { return product; }</span>
+    
+<span class="nc" id="L53">    public void setProduct(Product product) { this.product = product; }</span>
+    
+<span class="fc" id="L55">    public PaymentMode getPaymentMode() { return paymentMode; }</span>
+    
+<span class="fc" id="L57">    public void setPaymentMode(PaymentMode paymentMode) { this.paymentMode = paymentMode; }</span>
+    
+<span class="nc" id="L59">    public String getTransactionId() { return transactionId; }</span>
+    
+<span class="fc" id="L61">    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }</span>
+    
+<span class="fc" id="L63">    public LocalDateTime getCreatedAt() { return createdAt; }</span>
+    
+<span class="nc" id="L65">    public String getCreatedByUsername() { return createdByUsername; }</span>
+    
+<span class="fc" id="L67">    public void setCreatedByUsername(String createdByUsername) { this.createdByUsername = createdByUsername; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

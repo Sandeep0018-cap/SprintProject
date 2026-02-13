@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PurchaseServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.service.impl</a> &gt; <span class="el_source">PurchaseServiceImpl.java</span></div><h1>PurchaseServiceImpl.java</h1><pre class="source lang-java linenums">package com.cg.service.impl;
+
+import com.cg.dto.PurchaseCreateDto;
+import com.cg.entity.*;
+import com.cg.enums.PaymentMode;
+import com.cg.exception.BadRequestException;
+import com.cg.exception.ResourceNotFoundException;
+import com.cg.repository.*;
+import com.cg.service.IPurchaseService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+public class PurchaseServiceImpl implements IPurchaseService {
+
+    private final PurchaseRepository purchaseRepository;
+    private final PurchaseItemRepository purchaseItemRepository;
+    private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
+
+    public PurchaseServiceImpl(PurchaseRepository purchaseRepository,
+                               PurchaseItemRepository purchaseItemRepository,
+                               CustomerRepository customerRepository,
+<span class="fc" id="L27">                               ProductRepository productRepository) {</span>
+<span class="fc" id="L28">        this.purchaseRepository = purchaseRepository;</span>
+<span class="fc" id="L29">        this.purchaseItemRepository = purchaseItemRepository;</span>
+<span class="fc" id="L30">        this.customerRepository = customerRepository;</span>
+<span class="fc" id="L31">        this.productRepository = productRepository;</span>
+<span class="fc" id="L32">    }</span>
+
+    @Override
+    @Transactional
+    public Purchase createPurchase(PurchaseCreateDto dto, String createdByUsername) {
+<span class="fc" id="L37">        Customer customer = customerRepository.findById(dto.getCustomerId())</span>
+<span class="fc" id="L38">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found: &quot; + dto.getCustomerId()));</span>
+
+<span class="fc" id="L40">        Product product = productRepository.findById(dto.getProductId())</span>
+<span class="fc" id="L41">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Product not found: &quot; + dto.getProductId()));</span>
+
+        // Unified rule: Txn ID required for CARD and NETBANKING
+<span class="pc bpc" id="L44" title="1 of 4 branches missed.">        if ((dto.getPaymentMode() == PaymentMode.CARD || dto.getPaymentMode() == PaymentMode.NETBANKING)</span>
+<span class="pc bpc" id="L45" title="1 of 4 branches missed.">                &amp;&amp; (dto.getTransactionId() == null || dto.getTransactionId().isBlank())) {</span>
+<span class="fc" id="L46">            throw new BadRequestException(&quot;Transaction ID is required for CARD/NETBANKING payment&quot;);</span>
+        }
+
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (dto.getPaymentMode() == PaymentMode.COD) {</span>
+<span class="fc" id="L50">            dto.setTransactionId(null);</span>
+        }
+
+<span class="fc" id="L53">        Purchase purchase = new Purchase();</span>
+<span class="fc" id="L54">        purchase.setCustomer(customer);</span>
+<span class="fc" id="L55">        purchase.setPaymentMode(dto.getPaymentMode());</span>
+<span class="fc" id="L56">        purchase.setTransactionId(dto.getTransactionId());</span>
+<span class="fc" id="L57">        purchase.setCreatedByUsername(createdByUsername);</span>
+<span class="fc" id="L58">        Purchase saved = purchaseRepository.save(purchase);</span>
+
+<span class="fc" id="L60">        PurchaseItem item = new PurchaseItem();</span>
+<span class="fc" id="L61">        item.setPurchase(saved);</span>
+<span class="fc" id="L62">        item.setProduct(product);</span>
+<span class="fc" id="L63">        item.setQuantity(dto.getQuantity());</span>
+<span class="fc" id="L64">        item.setUnitPrice(product.getPrice());</span>
+<span class="fc" id="L65">        purchaseItemRepository.save(item);</span>
+
+<span class="fc" id="L67">        customer.setLastPurchasedProductName(product.getName());</span>
+<span class="fc" id="L68">        customer.setLastPurchasedBrand(product.getBrand());</span>
+<span class="fc" id="L69">        customerRepository.save(customer);</span>
+
+<span class="fc" id="L71">        return saved;</span>
+    }
+
+    @Override
+    public Map&lt;String, Long&gt; paymentModeCounts() {
+<span class="fc" id="L76">        return purchaseRepository.findAll().stream()</span>
+<span class="fc" id="L77">                .collect(Collectors.groupingBy(p -&gt; p.getPaymentMode().name(), Collectors.counting()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

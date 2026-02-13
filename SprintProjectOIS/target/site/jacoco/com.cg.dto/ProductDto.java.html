@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.dto</a> &gt; <span class="el_source">ProductDto.java</span></div><h1>ProductDto.java</h1><pre class="source lang-java linenums">package com.cg.dto;
+
+<span class="fc" id="L3">public class ProductDto { // Data carrier for product management and catalog views</span>
+
+    private Long productId; // Unique database identifier
+    private String skuId; // Unique Stock Keeping Unit for inventory tracking
+    private String name; // Display name of the product
+    private String brand; // Manufacturer or brand name
+    private Double price; // Unit selling price
+    private Integer stockQty; // Total units received into inventory
+
+    private Long vendorId; // Mandatory reference to the primary supplier
+    private Long categoryId; // Reference to the parent classification
+
+    private Integer soldQty; // Analytical: Total units sold based on transactions
+    private Integer availableQty; // Analytical: Current sellable stock (Stock - Sold)
+    private Long lastPurchaseId; // Analytical: Reference to the most recent sale record
+
+<span class="fc" id="L19">    public Long getProductId() { return productId; }</span>
+<span class="fc" id="L20">    public void setProductId(Long productId) { this.productId = productId; }</span>
+
+<span class="fc" id="L22">    public String getSkuId() { return skuId; }</span>
+<span class="fc" id="L23">    public void setSkuId(String skuId) { this.skuId = skuId; }</span>
+
+<span class="fc" id="L25">    public String getName() { return name; }</span>
+<span class="fc" id="L26">    public void setName(String name) { this.name = name; }</span>
+
+<span class="fc" id="L28">    public String getBrand() { return brand; }</span>
+<span class="fc" id="L29">    public void setBrand(String brand) { this.brand = brand; }</span>
+
+<span class="fc" id="L31">    public Double getPrice() { return price; }</span>
+<span class="fc" id="L32">    public void setPrice(Double price) { this.price = price; }</span>
+
+<span class="fc" id="L34">    public Integer getStockQty() { return stockQty; }</span>
+<span class="fc" id="L35">    public void setStockQty(Integer stockQty) { this.stockQty = stockQty; }</span>
+
+<span class="fc" id="L37">    public Long getVendorId() { return vendorId; }</span>
+<span class="fc" id="L38">    public void setVendorId(Long vendorId) { this.vendorId = vendorId; }</span>
+
+<span class="nc" id="L40">    public Long getCategoryId() { return categoryId; }</span>
+<span class="fc" id="L41">    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }</span>
+
+<span class="nc" id="L43">    public Integer getSoldQty() { return soldQty; }</span>
+<span class="fc" id="L44">    public void setSoldQty(Integer soldQty) { this.soldQty = soldQty; }</span>
+
+<span class="nc" id="L46">    public Integer getAvailableQty() { return availableQty; }</span>
+<span class="fc" id="L47">    public void setAvailableQty(Integer availableQty) { this.availableQty = availableQty; }</span>
+
+<span class="nc" id="L49">    public Long getLastPurchaseId() { return lastPurchaseId; }</span>
+<span class="nc" id="L50">    public void setLastPurchaseId(Long lastPurchaseId) { this.lastPurchaseId = lastPurchaseId; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

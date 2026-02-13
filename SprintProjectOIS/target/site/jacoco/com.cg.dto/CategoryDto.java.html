@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.dto</a> &gt; <span class="el_source">CategoryDto.java</span></div><h1>CategoryDto.java</h1><pre class="source lang-java linenums">package com.cg.dto; // Defines the package for Data Transfer Objects
+
+public class CategoryDto { // Lightweight object for moving category data between layers
+
+    private Long categoryId; // Unique identifier for the category
+    private String name; // Human-readable name of the category
+
+<span class="nc" id="L8">    public CategoryDto() {} // Default constructor required for JSON/Form binding</span>
+
+<span class="fc" id="L10">    public CategoryDto(Long id, String name) { // Overloaded constructor for quick instantiation</span>
+<span class="fc" id="L11">        this.categoryId = id; </span>
+<span class="fc" id="L12">        this.name = name; </span>
+<span class="fc" id="L13">    }</span>
+
+    public Long getCategoryId() { // Returns the primary key of the category
+<span class="fc" id="L16">        return categoryId;</span>
+    }
+
+    public void setCategoryId(Long categoryId) { // Assigns the primary key
+<span class="nc" id="L20">        this.categoryId = categoryId;</span>
+<span class="nc" id="L21">    }</span>
+
+    public String getName() { // Returns the category display name
+<span class="fc" id="L24">        return name; </span>
+    }
+
+    public void setName(String name) { // Assigns the category display name
+<span class="nc" id="L28">        this.name = name; </span>
+<span class="nc" id="L29">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

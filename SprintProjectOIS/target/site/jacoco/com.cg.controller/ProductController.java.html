@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.controller</a> &gt; <span class="el_source">ProductController.java</span></div><h1>ProductController.java</h1><pre class="source lang-java linenums">package com.cg.controller;
+
+import com.cg.dto.ProductDto;
+import com.cg.repository.CategoryRepository;
+import com.cg.repository.VendorRepository;
+import com.cg.service.IProductService;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import javax.validation.Valid;
+
+@Controller
+@RequestMapping(&quot;/products&quot;)
+public class ProductController {
+
+    private final IProductService productService;
+    private final CategoryRepository categoryRepository;
+    private final VendorRepository vendorRepository;
+
+    public ProductController(IProductService productService,
+                             CategoryRepository categoryRepository,
+<span class="fc" id="L29">                             VendorRepository vendorRepository) {</span>
+<span class="fc" id="L30">        this.productService = productService;</span>
+<span class="fc" id="L31">        this.categoryRepository = categoryRepository;</span>
+<span class="fc" id="L32">        this.vendorRepository = vendorRepository;</span>
+<span class="fc" id="L33">    }</span>
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+<span class="fc" id="L37">        binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));</span>
+<span class="fc" id="L38">    }</span>
+
+    @GetMapping(path = &quot;/new&quot;, produces = MediaType.TEXT_HTML_VALUE)
+    public String newProduct(@RequestParam(&quot;categoryId&quot;) Long categoryId, Model model) {
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (!model.containsAttribute(&quot;product&quot;)) {</span>
+<span class="fc" id="L43">            model.addAttribute(&quot;product&quot;, new ProductDto());</span>
+        }
+<span class="fc" id="L45">        model.addAttribute(&quot;categoryId&quot;, categoryId);</span>
+<span class="fc" id="L46">        model.addAttribute(&quot;vendors&quot;, vendorRepository.findAll());</span>
+<span class="fc" id="L47">        return &quot;products/product-form&quot;; // moved into templates/products/</span>
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String create(@Valid @ModelAttribute(&quot;product&quot;) ProductDto product,
+                         BindingResult binding,
+                         @RequestParam(value = &quot;categoryId&quot;, required = false) Long categoryId,
+                         RedirectAttributes ra,
+                         Model model) {
+<span class="nc" id="L56">        model.addAttribute(&quot;categoryId&quot;, categoryId);</span>
+<span class="nc" id="L57">        model.addAttribute(&quot;vendors&quot;, vendorRepository.findAll());</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (categoryId == null) {</span>
+<span class="nc" id="L59">            model.addAttribute(&quot;error&quot;, &quot;Missing category. Please start from the category page and try again.&quot;);</span>
+<span class="nc" id="L60">            return &quot;products/product-form&quot;;</span>
+        }
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (product.getVendorId() == null) {</span>
+<span class="nc" id="L63">            binding.rejectValue(&quot;vendorId&quot;, &quot;NotNull&quot;, &quot;Vendor is required&quot;);</span>
+        }
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (binding.hasErrors()) {</span>
+<span class="nc" id="L66">            return &quot;products/product-form&quot;;</span>
+        }
+        try {
+<span class="nc" id="L69">            productService.createOrUpdate(product, categoryId);</span>
+<span class="nc" id="L70">        } catch (DataIntegrityViolationException ex) {</span>
+<span class="nc" id="L71">            String msg = getRootMessage(ex).toLowerCase();</span>
+<span class="nc bnc" id="L72" title="All 6 branches missed.">            if (msg.contains(&quot;duplicate&quot;) || msg.contains(&quot;uk_&quot;) || msg.contains(&quot;unique&quot;)) {</span>
+<span class="nc" id="L73">                binding.rejectValue(&quot;skuId&quot;, &quot;sku.duplicate&quot;, &quot;SKU already exists&quot;);</span>
+            } else {
+<span class="nc" id="L75">                model.addAttribute(&quot;error&quot;, &quot;Could not save product: &quot; + getRootMessage(ex));</span>
+            }
+<span class="nc" id="L77">            return &quot;products/product-form&quot;;</span>
+<span class="nc" id="L78">        }</span>
+<span class="nc" id="L79">        ra.addFlashAttribute(&quot;success&quot;, &quot;Product added successfully&quot;);</span>
+<span class="nc" id="L80">        return &quot;redirect:/categories/&quot; + categoryId;</span>
+    }
+
+    @GetMapping(path = &quot;/{id}/edit&quot;, produces = MediaType.TEXT_HTML_VALUE)
+    public String edit(@PathVariable Long id,
+                       @RequestParam(value = &quot;categoryId&quot;, required = false) Long categoryId,
+                       Model model,
+                       RedirectAttributes ra) {
+        try {
+<span class="nc" id="L89">            ProductDto dto = productService.getByIdAsDto(id);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            Long resolvedCategoryId = (categoryId != null) ? categoryId : dto.getCategoryId();</span>
+<span class="nc" id="L91">            model.addAttribute(&quot;product&quot;, dto);</span>
+<span class="nc" id="L92">            model.addAttribute(&quot;categoryId&quot;, resolvedCategoryId);</span>
+<span class="nc" id="L93">            model.addAttribute(&quot;vendors&quot;, vendorRepository.findAll());</span>
+<span class="nc" id="L94">            return &quot;products/product-form&quot;;</span>
+<span class="nc" id="L95">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L96">            ra.addFlashAttribute(&quot;error&quot;, &quot;Product not found or cannot be loaded.&quot;);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            return &quot;redirect:/categories/&quot; + (categoryId != null ? categoryId : 0L);</span>
+        }
+    }
+
+    @PutMapping(path = &quot;/{id}&quot;, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String update(@PathVariable(&quot;id&quot;) Long id,
+                         @Valid @ModelAttribute(&quot;product&quot;) ProductDto product,
+                         BindingResult binding,
+                         @RequestParam(value = &quot;categoryId&quot;, required = false) Long categoryId,
+                         RedirectAttributes ra,
+                         Model model) {
+<span class="nc" id="L108">        product.setProductId(id);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        Long resolvedCategoryId = (categoryId != null) ? categoryId : product.getCategoryId();</span>
+<span class="nc" id="L110">        model.addAttribute(&quot;categoryId&quot;, resolvedCategoryId);</span>
+<span class="nc" id="L111">        model.addAttribute(&quot;vendors&quot;, vendorRepository.findAll());</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (resolvedCategoryId == null) {</span>
+<span class="nc" id="L113">            binding.reject(&quot;category.required&quot;, &quot;Missing category context.&quot;);</span>
+        }
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (binding.hasErrors()) {</span>
+<span class="nc" id="L116">            return &quot;products/product-form&quot;;</span>
+        }
+        try {
+<span class="nc" id="L119">            productService.createOrUpdate(product, resolvedCategoryId);</span>
+<span class="nc" id="L120">        } catch (DataIntegrityViolationException ex) {</span>
+<span class="nc" id="L121">            handleDuplicateSku(ex, binding, model);</span>
+<span class="nc" id="L122">            return &quot;products/product-form&quot;;</span>
+<span class="nc" id="L123">        }</span>
+<span class="nc" id="L124">        ra.addFlashAttribute(&quot;success&quot;, &quot;Product updated successfully&quot;);</span>
+<span class="nc" id="L125">        return &quot;redirect:/categories/&quot; + resolvedCategoryId;</span>
+    }
+
+    @DeleteMapping(path = &quot;/{id}&quot;)
+    public String delete(@PathVariable Long id,
+                         @RequestParam(&quot;categoryId&quot;) Long categoryId,
+                         RedirectAttributes ra) {
+        try {
+<span class="nc" id="L133">            productService.delete(id);</span>
+<span class="nc" id="L134">            ra.addFlashAttribute(&quot;success&quot;, &quot;Product deleted&quot;);</span>
+<span class="nc" id="L135">        } catch (DataIntegrityViolationException ex) {</span>
+<span class="nc" id="L136">            ra.addFlashAttribute(&quot;error&quot;, &quot;Cannot delete product with existing sales/purchase history.&quot;);</span>
+<span class="nc" id="L137">        } catch (Exception ex) {</span>
+<span class="nc" id="L138">            ra.addFlashAttribute(&quot;error&quot;, &quot;Deletion failed: &quot; + getRootMessage(ex));</span>
+<span class="nc" id="L139">        }</span>
+<span class="nc" id="L140">        return &quot;redirect:/categories/&quot; + categoryId;</span>
+    }
+
+    private String getRootMessage(Throwable t) {
+<span class="nc" id="L144">        Throwable c = t;</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        while (c.getCause() != null) c = c.getCause();</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        return c.getMessage() != null ? c.getMessage() : t.getMessage();</span>
+    }
+
+    private void handleDuplicateSku(org.springframework.dao.DataIntegrityViolationException ex,
+                                    BindingResult binding, Model model) {
+<span class="nc" id="L151">        String msg = getRootMessage(ex).toLowerCase();</span>
+<span class="nc bnc" id="L152" title="All 6 branches missed.">        if (msg.contains(&quot;duplicate&quot;) || msg.contains(&quot;uk_&quot;) || msg.contains(&quot;unique&quot;)) {</span>
+<span class="nc" id="L153">            binding.rejectValue(&quot;skuId&quot;, &quot;sku.duplicate&quot;, &quot;SKU already exists&quot;);</span>
+        } else {
+<span class="nc" id="L155">            model.addAttribute(&quot;error&quot;, &quot;Update failed: &quot; + getRootMessage(ex));</span>
+        }
+<span class="nc" id="L157">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

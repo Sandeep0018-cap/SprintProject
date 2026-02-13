@@ -1,0 +1,66 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Standard header fragment for global theme and assets -->
+<head th:replace="~{fragments :: head('Login')}"></head>
+<body
+	class="main-wrapper d-flex align-items-center justify-content-center vh-100">
+	<!-- Centered viewport for login focus -->
+
+	<div class="container py-5" style="max-width: 480px;">
+		<!-- Authentication Card: Styled with shadow-strong for deep 3D depth -->
+		<div class="card border-0 shadow-strong overflow-hidden">
+			<div class="card-body p-5">
+
+				<h1 class="h4 mb-2 fw-bold text-primary">CG-OIS</h1>
+				<p class="text-muted mb-4 small text-uppercase ls-wide">Order
+					Inventory System</p>
+
+				<!-- Conditional Feedback: Authentication Failure -->
+				<div th:if="${param.error}"
+					class="alert alert-danger border-0 shadow-sm mb-4">
+					<i class="bi bi-exclamation-triangle me-2"></i>Invalid credentials
+					provided.
+				</div>
+
+				<!-- Conditional Feedback: Successful Logout -->
+				<div th:if="${param.logout}"
+					class="alert alert-success border-0 shadow-sm mb-4">
+					<i class="bi bi-check2-circle me-2"></i>You have logged out
+					successfully.
+				</div>
+
+				<!-- Login Form: Standard POST to /login with Spring Security processing -->
+				<form th:action="@{/login}" method="post" class="vstack gap-3">
+
+					<div>
+						<label class="form-label fw-bold">Username</label> <input
+							class="form-control shadow-inner" name="username"
+							placeholder="e.g., admin" required autofocus>
+					</div>
+
+					<!-- Input Group: Credentials -->
+					<div>
+						<label class="form-label fw-bold">Password</label> <input
+							class="form-control shadow-inner" type="password" name="password"
+							placeholder="••••••••" required>
+					</div>
+
+					<!-- Action: Standard Submit with 3D button styling -->
+					<button class="btn btn-primary w-100 shadow-soft py-2 mt-2"
+						type="submit">
+						<i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+					</button>
+				</form>
+
+				<!-- Credential Reference: For development and testing environments -->
+				<div class="mt-4 pt-3 border-top">
+					<div class="p-3 bg-light rounded-pill text-center small text-muted">
+						Admin | &nbsp;Staff
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

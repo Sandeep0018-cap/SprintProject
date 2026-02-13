@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductStockAlertDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.dto</a> &gt; <span class="el_source">ProductStockAlertDto.java</span></div><h1>ProductStockAlertDto.java</h1><pre class="source lang-java linenums">package com.cg.dto;
+
+public class ProductStockAlertDto { // DTO designed for dashboard notifications and inventory warnings
+
+    private Long productId; // Reference to the unique product record
+    private String brand; // Brand associated with the low-stock item
+    private String name; // Display name of the product requiring attention
+    private Integer availableQty; // Net inventory count after subtracting total units sold
+    private String severity; // Visual indicator (RED/ORANGE/GREEN) based on stock thresholds
+
+<span class="nc" id="L11">    public ProductStockAlertDto() {} // Standard constructor for framework compatibility</span>
+
+<span class="fc" id="L13">    public ProductStockAlertDto(Long productId, String brand, String name, Integer availableQty, String severity) {</span>
+<span class="fc" id="L14">        this.productId = productId;</span>
+<span class="fc" id="L15">        this.brand = brand;</span>
+<span class="fc" id="L16">        this.name = name;</span>
+<span class="fc" id="L17">        this.availableQty = availableQty;</span>
+<span class="fc" id="L18">        this.severity = severity;</span>
+<span class="fc" id="L19">    }</span>
+
+<span class="nc" id="L21">    public Long getProductId() { return productId; }</span>
+<span class="nc" id="L22">    public void setProductId(Long productId) { this.productId = productId; }</span>
+
+<span class="fc" id="L24">    public String getBrand() { return brand; }</span>
+<span class="nc" id="L25">    public void setBrand(String brand) { this.brand = brand; }</span>
+
+<span class="fc" id="L27">    public String getName() { return name; }</span>
+<span class="nc" id="L28">    public void setName(String name) { this.name = name; }</span>
+
+<span class="fc" id="L30">    public Integer getAvailableQty() { return availableQty; }</span>
+<span class="nc" id="L31">    public void setAvailableQty(Integer availableQty) { this.availableQty = availableQty; }</span>
+
+<span class="nc" id="L33">    public String getSeverity() { return severity; }</span>
+<span class="nc" id="L34">    public void setSeverity(String severity) { this.severity = severity; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

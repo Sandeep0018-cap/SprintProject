@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VendorDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.dto</a> &gt; <span class="el_source">VendorDto.java</span></div><h1>VendorDto.java</h1><pre class="source lang-java linenums">package com.cg.dto;
+
+public class VendorDto { // Data object for transferring supplier and contact information
+
+    private Long vendorId; // Unique identifier for the vendor entity
+    private String name; // Official trade or company name
+    private String contactName; // Primary point of contact person at the company
+    private String phone; // Direct contact number for the supplier
+    private String email; // Professional email address for procurement communication
+
+<span class="nc" id="L11">    public VendorDto() {} // Mandatory default constructor for bean instantiation</span>
+
+<span class="fc" id="L13">    public VendorDto(Long vendorId, String name, String contactName, String phone, String email) { // Constructor for batch data mapping</span>
+<span class="fc" id="L14">        this.vendorId = vendorId;</span>
+<span class="fc" id="L15">        this.name = name;</span>
+<span class="fc" id="L16">        this.contactName = contactName;</span>
+<span class="fc" id="L17">        this.phone = phone;</span>
+<span class="fc" id="L18">        this.email = email;</span>
+<span class="fc" id="L19">    }</span>
+
+    public Long getVendorId() {
+<span class="fc" id="L22">        return vendorId;</span>
+    }
+
+    public void setVendorId(Long vendorId) {
+<span class="nc" id="L26">        this.vendorId = vendorId;</span>
+<span class="nc" id="L27">    }</span>
+
+    public String getName() {
+<span class="fc" id="L30">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="nc" id="L34">        this.name = name;</span>
+<span class="nc" id="L35">    }</span>
+
+    public String getContactName() {
+<span class="fc" id="L38">        return contactName;</span>
+    }
+
+    public void setContactName(String contactName) {
+<span class="nc" id="L42">        this.contactName = contactName;</span>
+<span class="nc" id="L43">    }</span>
+
+    public String getPhone() {
+<span class="fc" id="L46">        return phone;</span>
+    }
+
+    public void setPhone(String phone) {
+<span class="nc" id="L50">        this.phone = phone;</span>
+<span class="nc" id="L51">    }</span>
+
+    public String getEmail() {
+<span class="fc" id="L54">        return email;</span>
+    }
+
+    public void setEmail(String email) {
+<span class="nc" id="L58">        this.email = email;</span>
+<span class="nc" id="L59">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

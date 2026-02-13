@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.controller</a> &gt; <span class="el_source">CategoryController.java</span></div><h1>CategoryController.java</h1><pre class="source lang-java linenums">package com.cg.controller;
+
+import com.cg.dto.ProductDto;
+import com.cg.service.ICategoryService;
+import com.cg.service.IProductService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
+import java.util.Map;
+
+@Controller
+public class CategoryController {
+
+    private final ICategoryService categoryService;
+    private final IProductService productService;
+
+<span class="fc" id="L20">    public CategoryController(ICategoryService categoryService, IProductService productService) {</span>
+<span class="fc" id="L21">        this.categoryService = categoryService;</span>
+<span class="fc" id="L22">        this.productService = productService;</span>
+<span class="fc" id="L23">    }</span>
+
+    // SHOW ALL CATEGORIES (ADMIN + STAFF + USER)
+    @GetMapping(&quot;/categories&quot;)
+    public String categories(Model model) {
+<span class="fc" id="L28">        model.addAttribute(&quot;categories&quot;, categoryService.findAll());</span>
+<span class="fc" id="L29">        return &quot;category/categories&quot;;   // &lt;--- FIXED</span>
+    }
+
+    // SHOW ALL PRODUCTS INSIDE SELECTED CATEGORY
+    @GetMapping(&quot;/categories/{id}&quot;)
+    public String categoryDetail(@PathVariable Long id, Model model) {
+
+<span class="fc" id="L36">        List&lt;ProductDto&gt; products =</span>
+<span class="fc" id="L37">                productService.findByCategoryWithDerivedStats(id);</span>
+
+<span class="fc" id="L39">        Map&lt;String, List&lt;ProductDto&gt;&gt; byBrand =</span>
+<span class="fc" id="L40">                productService.groupByBrand(products);</span>
+
+<span class="fc" id="L42">        String categoryName = categoryService.findAll().stream()</span>
+<span class="fc" id="L43">                .filter(c -&gt; c.getCategoryId().equals(id))</span>
+<span class="fc" id="L44">                .map(c -&gt; c.getName())</span>
+<span class="fc" id="L45">                .findFirst()</span>
+<span class="fc" id="L46">                .orElse(&quot;Category&quot;);</span>
+
+<span class="fc" id="L48">        model.addAttribute(&quot;categoryId&quot;, id);</span>
+<span class="fc" id="L49">        model.addAttribute(&quot;categoryName&quot;, categoryName);</span>
+<span class="fc" id="L50">        model.addAttribute(&quot;productsByBrand&quot;, byBrand);</span>
+
+<span class="fc" id="L52">        return &quot;category/category-detail&quot;;  // &lt;--- FIXED</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

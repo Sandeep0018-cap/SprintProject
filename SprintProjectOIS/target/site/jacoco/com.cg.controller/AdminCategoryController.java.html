@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminCategoryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SprintDB Order Inventory System</a> &gt; <a href="index.source.html" class="el_package">com.cg.controller</a> &gt; <span class="el_source">AdminCategoryController.java</span></div><h1>AdminCategoryController.java</h1><pre class="source lang-java linenums">package com.cg.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.cg.service.ICategoryService;
+
+@Controller
+@RequestMapping(&quot;/admin/categories&quot;)
+public class AdminCategoryController {
+
+    private final ICategoryService categoryService;
+
+<span class="fc" id="L15">    public AdminCategoryController(ICategoryService categoryService) {</span>
+<span class="fc" id="L16">        this.categoryService = categoryService;</span>
+<span class="fc" id="L17">    }</span>
+
+    // List all categories
+    @GetMapping
+    public String list(Model model) {
+<span class="fc" id="L22">        model.addAttribute(&quot;categories&quot;, categoryService.findAll());</span>
+<span class="fc" id="L23">        return &quot;admin/categories&quot;; // moved into templates/admin/</span>
+    }
+
+    // Save updates from modal and redirect back to the main list
+    @PostMapping(&quot;/{id}/edit&quot;)
+    public String update(@PathVariable(&quot;id&quot;) Long id,
+                         @RequestParam(&quot;name&quot;) String name,
+                         RedirectAttributes ra) {
+        try {
+<span class="nc" id="L32">            categoryService.update(id, name);</span>
+<span class="nc" id="L33">            ra.addFlashAttribute(&quot;msg&quot;, &quot;Category updated successfully&quot;);</span>
+<span class="fc" id="L34">        } catch (Exception ex) {</span>
+<span class="fc" id="L35">            ra.addFlashAttribute(&quot;err&quot;, &quot;Update failed: &quot; + ex.getMessage());</span>
+<span class="nc" id="L36">        }</span>
+<span class="fc" id="L37">        return &quot;redirect:/admin/categories&quot;;</span>
+    }
+
+    // Create a new category
+    @PostMapping
+    public String create(@RequestParam(&quot;name&quot;) String name, RedirectAttributes ra) {
+        try {
+<span class="fc" id="L44">            categoryService.create(name);</span>
+<span class="fc" id="L45">            ra.addFlashAttribute(&quot;msg&quot;, &quot;Category added successfully&quot;);</span>
+<span class="fc" id="L46">        } catch (Exception ex) {</span>
+<span class="fc" id="L47">            ra.addFlashAttribute(&quot;err&quot;, &quot;Creation failed: &quot; + ex.getMessage());</span>
+<span class="fc" id="L48">        }</span>
+<span class="fc" id="L49">        return &quot;redirect:/admin/categories&quot;;</span>
+    }
+
+    // Delete a category
+    @DeleteMapping(&quot;/delete/{id}&quot;)
+    public String delete(@PathVariable(&quot;id&quot;) Long id, RedirectAttributes ra) {
+        try {
+<span class="fc" id="L56">            categoryService.delete(id);</span>
+<span class="fc" id="L57">            ra.addFlashAttribute(&quot;msg&quot;, &quot;Category deleted successfully&quot;);</span>
+<span class="fc" id="L58">        } catch (Exception ex) {</span>
+<span class="fc" id="L59">            ra.addFlashAttribute(&quot;err&quot;, &quot;Delete failed: &quot; + ex.getMessage());</span>
+<span class="fc" id="L60">        }</span>
+<span class="fc" id="L61">        return &quot;redirect:/admin/categories&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

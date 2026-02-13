@@ -1,0 +1,63 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Browse Categories')}"></head>
+
+<body class="main-wrapper">
+
+<div th:replace="~{fragments :: nav}"></div>
+
+<div class="container py-4">
+
+    <h2 class="fw-bold mb-4">
+        <i class="bi bi-grid-3x3-gap-fill me-2"></i> Browse Categories
+    </h2>
+
+    <div class="row g-4">
+        <!-- Category Tile -->
+        <div class="col-md-3" th:each="c : ${categories}">
+            <!-- Link wrapped properly; Category ID display removed -->
+            <a th:href="@{/categories/{id}(id=${c.categoryId})}" class="text-decoration-none text-dark">
+                <div class="category-tile shadow-sm p-4 text-center rounded-4">
+                    <h5 class="fw-bold mb-0" th:text="${c.name}">Category Name</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- No Categories Check -->
+    <div class="alert alert-info mt-4" th:if="${categories == null or #lists.isEmpty(categories)}">
+        <i class="bi bi-info-circle me-2"></i> No categories available.
+    </div>
+</div>
+
+<style>
+    .category-tile {
+        background: white;
+        border: 1px solid #eef1f5;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        min-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .category-tile:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+        background-color: #fcfcfc;
+        border-color: #0d6efd;
+    }
+    .category-tile h5 {
+        transition: color 0.2s ease;
+    }
+    .category-tile:hover h5 {
+        color: #0d6efd;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net"></script>
+
+</body>
+</html>

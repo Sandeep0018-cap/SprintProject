@@ -1,0 +1,45 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Standard header fragment for global theme and icons -->
+<head th:replace="~{fragments :: head('Error')}"></head>
+<body class="main-wrapper">
+	<!-- Activates the 3D entrance animation -->
+
+	<div th:replace="~{fragments :: nav}"></div>
+
+	<div class="container py-5 d-flex justify-content-center">
+		<!-- Error Container: Styled with Neumorphic depth and Glassmorphic accents -->
+		<div class="card border-0 shadow-strong overflow-hidden"
+			style="max-width: 600px; width: 100%;">
+			<div class="card-body p-5 text-center">
+
+				<!-- Visual Indicator: High-contrast error icon -->
+				<div class="mb-4">
+					<i class="bi bi-exclamation-triangle-fill text-danger"
+						style="font-size: 4rem;"></i>
+				</div>
+
+				<h2 class="h4 fw-bold mb-3">Something went wrong</h2>
+
+				<!-- Dynamic Error Message: Captured from the GlobalExceptionHandler -->
+				<p class="text-muted mb-4 px-3" th:text="${message}">An
+					unexpected error occurred while processing your request.</p>
+
+				<!-- Navigation fallback to the main analytical view -->
+				<div class="d-grid gap-2">
+					<a class="btn btn-primary shadow-soft py-2" th:href="@{/dashboard}">
+						<i class="bi bi-house-door-fill me-2"></i>Return to Dashboard
+					</a>
+				</div>
+			</div>
+
+			<!-- Contextual Footer: Subtle hint for technical support -->
+			<div class="card-footer bg-transparent border-0 text-center pb-4">
+				<small class="text-muted opacity-50">SprintDB Transaction
+					Protection Active</small>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
